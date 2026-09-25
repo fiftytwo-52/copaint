@@ -41,18 +41,36 @@ body {
 }
 .hpLogo:focus-visible { outline: 2px solid #2f7bff; outline-offset: 3px; border-radius: 8px; }
 .hpLogoMark { width: 34px; height: 34px; display: block; }
-.hpLinks { display: flex; gap: 16px; flex-wrap: wrap; margin-left: auto; }
+.hpLinks {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-left: auto;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 5px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(106, 76, 147, 0.12);
+  box-shadow: 0 2px 10px rgba(80, 60, 140, 0.04);
+}
 .hpLinks a {
   font-family: var(--font-body);
-  color: #57536e;
+  color: #4a4763;
   font-weight: 600;
-  font-size: 15px;
+  font-size: 14px;
   text-decoration: none;
-  transition: color 0.15s ease;
-  padding: 4px 6px;
-  border-radius: 6px;
+  transition: all 0.15s ease;
+  padding: 6px 14px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
 }
-.hpLinks a:hover { color: #2f7bff; }
+.hpLinks a:hover {
+  color: #2f7bff;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(80, 60, 140, 0.08);
+}
 .hpLinks a:focus-visible { outline: 2px solid #2f7bff; outline-offset: 2px; }
 
 .hpStart {
@@ -188,8 +206,17 @@ kbd {
   .hpSec { padding: 22px 18px; border-radius: 18px; }
   .hpNav { gap: 10px; padding: 10px 4px; }
   .hpLogo { font-size: 24px; }
-  .hpLinks { order: 3; width: 100%; margin-left: 0; flex-wrap: nowrap; overflow-x: auto; gap: 10px; padding-bottom: 4px; }
-  .hpLinks a { white-space: nowrap; font-size: 14px; }
+  .hpLinks {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 999px;
+  }
+  .hpLinks a { white-space: nowrap; font-size: 13px; padding: 6px 12px; }
   .hpNav .hpStart { margin-left: auto; font-size: 14px; padding: 8px 18px; }
   .hpKeys tr td:first-child { white-space: normal; width: 55%; }
   .hpKeys td { font-size: 14px; padding: 7px 6px; }
