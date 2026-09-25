@@ -199,6 +199,76 @@ kbd {
 .hpMail { color: #2f7bff; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 .hpMail:hover { color: #1e63e0; }
 
+/* Share section */
+.hpShareRow {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 0;
+  margin: 4px 0 0;
+}
+.hpShareBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  color: #4a4763;
+  background: #ffffff;
+  border: 1.5px solid #e3dcf5;
+  border-radius: 999px;
+  padding: 9px 18px 9px 12px;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(80, 60, 140, 0.06);
+  transition: transform 0.12s ease, box-shadow 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.hpShareBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(80, 60, 140, 0.14);
+}
+.hpShareBtn:focus-visible { outline: 3px solid #2f7bff; outline-offset: 3px; }
+.hpShareIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  background: #6a4c93;
+  flex-shrink: 0;
+  transition: transform 0.12s ease;
+}
+.hpShareBtn:hover .hpShareIcon { transform: scale(1.06); }
+
+/* Brand colours */
+.hpShareFacebook .hpShareIcon { background: #1877f2; }
+.hpShareWhatsapp .hpShareIcon { background: #25d366; }
+.hpShareTwitter  .hpShareIcon { background: #2b2b3a; }
+.hpShareInstagram .hpShareIcon {
+  background: linear-gradient(45deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%);
+}
+.hpShareFacebook:hover { border-color: #1877f2; color: #1877f2; }
+.hpShareWhatsapp:hover { border-color: #25d366; color: #128c4a; }
+.hpShareTwitter:hover  { border-color: #2b2b3a; color: #2b2b3a; }
+.hpShareInstagram:hover { border-color: #ee2a7b; color: #c9106a; }
+
+.hpShareNote {
+  margin: 16px 0 0;
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #128c4a;
+  background: #eefbf2;
+  border: 1px solid #bfe9cf;
+  border-radius: 12px;
+  padding: 10px 14px;
+  word-break: break-word;
+}
+
 /* Enhanced Modern Footer */
 .hpFooter {
   margin-top: 36px;
@@ -393,6 +463,11 @@ kbd {
   .hpNav .hpStart { margin-left: auto; font-size: 14px; padding: 8px 18px; }
   .hpKeys tr td:first-child { white-space: normal; width: 55%; }
   .hpKeys td { font-size: 14px; padding: 7px 6px; }
+
+  /* Responsive Share buttons */
+  .hpShareRow { gap: 10px; }
+  .hpShareBtn { flex: 1 1 calc(50% - 10px); justify-content: flex-start; font-size: 14px; padding: 8px 14px 8px 10px; }
+  .hpShareLabel { white-space: nowrap; }
 
   /* Responsive Footer */
   .hpFooterCard { padding: 28px 20px 20px; border-radius: 20px; }

@@ -1,0 +1,129 @@
+---
+/* Homepage "Share coPaint" section: Facebook, WhatsApp, Instagram and X (Twitter) share buttons.
+   Share URLs are server-rendered with the production domain as a fallback, then upgraded at
+   runtime to the visitor's actual URL (so preview domains and custom domains work too). */
+const siteUrl = "https://copaint-qxc.pages.dev/";
+const shareText = "coPaint — a free online drawing app for kids. Draw, paint and create together with no sign-up!";
+const encodedUrl = encodeURIComponent(siteUrl);
+const encodedText = encodeURIComponent(shareText);
+---
+<section class="hpSec" id="hpShare" aria-labelledby="hpShareTitle">
+  <h2 id="hpShareTitle">Share coPaint</h2>
+  <p>Know a teacher, a parent or a little artist who would love a free drawing canvas? Send them coPaint in one tap.</p>
+
+  <ul class="hpShareRow">
+    <li>
+      <a
+        class="hpShareBtn hpShareFacebook"
+        href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
+        data-share="facebook"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Share coPaint on Facebook"
+      >
+        <span class="hpShareIcon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06C2 17.08 5.66 21.24 10.44 22v-7.02H7.9v-2.92h2.54V9.85c0-2.52 1.5-3.91 3.77-3.91 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.45 2.92h-2.33V22C18.34 21.24 22 17.08 22 12.06z"/></svg>
+        </span>
+        <span class="hpShareLabel">Facebook</span>
+      </a>
+    </li>
+    <li>
+      <a
+        class="hpShareBtn hpShareWhatsapp"
+        href={`https://wa.me/?text=${encodeURIComponent(`${shareText} ${siteUrl}`)}`}
+        data-share="whatsapp"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Share coPaint on WhatsApp"
+      >
+        <span class="hpShareIcon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.4 1.26 4.83L2 22l5.4-1.41c1.38.75 2.96 1.18 4.64 1.18 5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm0 18.15c-1.5 0-2.9-.4-4.12-1.1l-.3-.18-3.2.84.85-3.12-.19-.32a8.16 8.16 0 01-1.25-4.36c0-4.52 3.68-8.2 8.21-8.2 4.52 0 8.2 3.68 8.2 8.2s-3.68 8.24-8.2 8.24zm4.5-6.15c-.25-.12-1.46-.72-1.69-.8-.23-.09-.39-.13-.56.12-.16.25-.64.8-.78.97-.15.16-.29.18-.54.06-.25-.12-1.05-.39-2-1.24-.74-.66-1.24-1.47-1.38-1.72-.15-.25-.02-.39.11-.51.11-.11.25-.29.37-.44.12-.14.16-.25.25-.41.08-.17.04-.31-.03-.44-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.09 0 1.24.9 2.43 1.02 2.6.12.16 1.77 2.7 4.28 3.78.6.26 1.06.41 1.43.52.6.19 1.15.16 1.58.1.48-.07 1.48-.6 1.69-1.19.21-.58.21-1.08.15-1.19-.06-.1-.23-.16-.48-.28z"/></svg>
+        </span>
+        <span class="hpShareLabel">WhatsApp</span>
+      </a>
+    </li>
+    <li>
+      <a
+        class="hpShareBtn hpShareTwitter"
+        href={`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`}
+        data-share="twitter"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Share coPaint on X (Twitter)"
+      >
+        <span class="hpShareIcon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.53 3h3.02l-6.6 7.54L21.75 21h-6.12l-4.79-6.26L5.35 21H2.32l7.06-8.07L2.25 3h6.27l4.33 5.73L17.53 3zm-1.06 16.2h1.68L7.6 4.72H5.8l10.67 14.48z"/></svg>
+        </span>
+        <span class="hpShareLabel">X (Twitter)</span>
+      </a>
+    </li>
+    <li>
+      <button
+        type="button"
+        class="hpShareBtn hpShareInstagram"
+        id="hpShareInsta"
+        data-share="instagram"
+        aria-label="Copy the coPaint link to share on Instagram"
+      >
+        <span class="hpShareIcon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="5.2"/><circle cx="12" cy="12" r="4.1"/><circle cx="17.3" cy="6.7" r="1.2" fill="currentColor" stroke="none"/></svg>
+        </span>
+        <span class="hpShareLabel">Instagram</span>
+      </button>
+    </li>
+  </ul>
+
+  <p class="hpShareNote" id="hpShareNote" role="status" aria-live="polite" hidden></p>
+
+  <script>
+    /* Instagram has no web share intent, so its button copies the link instead.
+       All share URLs are rebuilt from the visitor's real address so preview and
+       custom domains always share the correct page. */
+    const shareUrl = window.location.href;
+    const shareMessage = "coPaint — a free online drawing app for kids. Draw, paint and create together with no sign-up!";
+    const encodedPage = encodeURIComponent(shareUrl);
+
+    const shareTargets: Record<string, string> = {
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedPage}`,
+      whatsapp: `https://wa.me/?text=${encodeURIComponent(`${shareMessage} ${shareUrl}`)}`,
+      twitter: `https://twitter.com/intent/tweet?url=${encodedPage}&text=${encodeURIComponent(shareMessage)}`
+    };
+
+    document.querySelectorAll('[data-share]').forEach((element) => {
+      const key = element.getAttribute('data-share') || '';
+      if (shareTargets[key]) element.setAttribute('href', shareTargets[key]);
+    });
+
+    const note = document.getElementById('hpShareNote');
+    let noteTimer: number | undefined;
+
+    function showNote(message: string) {
+      if (!note) return;
+      note.textContent = message;
+      note.hidden = false;
+      if (noteTimer) window.clearTimeout(noteTimer);
+      noteTimer = window.setTimeout(() => { note.hidden = true; }, 6000);
+    }
+
+    document.getElementById('hpShareInsta')?.addEventListener('click', async () => {
+      const copied = 'Link copied! Paste it into your Instagram story, post or bio.';
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        showNote(copied);
+      } catch {
+        /* The Clipboard API needs a secure context — fall back to a manual copy. */
+        const temp = document.createElement('textarea');
+        temp.value = shareUrl;
+        temp.setAttribute('readonly');
+        temp.style.position = 'fixed';
+        temp.style.opacity = '0';
+        document.body.appendChild(temp);
+        temp.select();
+        let ok = false;
+        try { ok = document.execCommand('copy'); } catch { ok = false; }
+        document.body.removeChild(temp);
+        showNote(ok ? copied : `Copy this link for Instagram: ${shareUrl}`);
+      }
+    });
+  </script>
+</section>
