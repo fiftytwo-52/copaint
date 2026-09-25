@@ -93,6 +93,7 @@ The dev server starts at **http://localhost:4321/** (the paint app at `/`, the i
 | `npm run dev` | Start the Astro dev server with hot reload |
 | `npm run build` | Build the static site into `dist/` |
 | `npm run preview` | Preview the production build locally |
+| `npm run deploy` | Build and deploy directly to Cloudflare Pages |
 
 ---
 
@@ -179,8 +180,14 @@ The site is fully static — deploy `dist/` to any static host.
 **Cloudflare Pages** (current production):
 
 ```bash
+npm run deploy
+```
+
+Or manually:
+
+```bash
 npm run build
-npx wrangler pages deploy dist --project-name=copaint
+npx wrangler pages deploy dist --project-name=copaint --branch=main
 ```
 
 Or connect the GitHub repo in the Cloudflare dashboard with build command `npm run build` and output directory `dist` for automatic deploys on every push.
