@@ -3533,7 +3533,9 @@ function exportPDF() {
 
 /* keyboard shortcuts */
 document.addEventListener('keydown', (e) => {
-  const typing = textEditWrap.hidden === false || document.activeElement === nameInput || document.activeElement === zoomInput;
+  const activeEl = document.activeElement;
+  const isInputFocused = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable);
+  const typing = (textEditWrap && textEditWrap.hidden === false) || isInputFocused;
   const mod = e.ctrlKey || e.metaKey;
   if (mod && !typing) {
     if (e.key.toLowerCase() === 'z' && !e.shiftKey) { e.preventDefault(); document.getElementById('undo').click(); }
