@@ -187,7 +187,7 @@ Or manually:
 
 ```bash
 npm run build
-npx wrangler pages deploy dist --project-name=copaint --branch=main
+npx --yes wrangler@4 pages deploy dist --project-name=copaint --branch=main
 ```
 
 Or connect the GitHub repo in the Cloudflare dashboard with build command `npm run build` and output directory `dist` for automatic deploys on every push.
