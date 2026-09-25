@@ -1,7 +1,83 @@
 ---
-/* Homepage footer: Start Drawing button + copyright line. */
+/* Homepage footer: modern multi-column card layout with branding, internal links, CTA, and badges. */
 ---
-<footer class="hpFoot">
-  <a class="hpStart hpBig" href="/">Start Drawing</a>
-  <p>coPaint — made for little artists. © 2026</p>
+<footer class="hpFooter" role="contentinfo">
+  <div class="hpFooterCard">
+    <div class="hpFooterTop">
+      <div class="hpFooterBrand">
+        <a href="/home" class="hpFooterLogo" aria-label="coPaint homepage">
+          <svg class="hpLogoMark" viewBox="0 0 64 64" aria-hidden="true">
+            <rect width="64" height="64" rx="14" fill="#2b2b3a"/>
+            <path d="M20 45 L43 22" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
+            <circle cx="47" cy="18" r="5.5" fill="#ffffff"/>
+          </svg>
+          <span>coPaint</span>
+        </a>
+        <p class="hpFooterTagline">
+          The joyful, free online paint tool and collaborative whiteboard for classrooms, teachers, kids, and creative minds.
+        </p>
+        <div class="hpFooterPills">
+          <span class="hpFooterBadge">🎨 100% Free</span>
+          <span class="hpFooterBadge">⚡ No Login Required</span>
+          <span class="hpFooterBadge">🔒 Privacy First</span>
+        </div>
+      </div>
+
+      <div class="hpFooterCols">
+        <div class="hpFooterCol">
+          <span class="hpFooterColTitle">Product</span>
+          <ul>
+            <li><a href="/">Draw App (Canvas)</a></li>
+            <li><a href="/home#hpFeatures">All Features</a></li>
+            <li><a href="/home#hpGuides">Drawing Guides</a></li>
+            <li><a href="/home#hpFaq">Frequently Asked</a></li>
+          </ul>
+        </div>
+
+        <div class="hpFooterCol">
+          <span class="hpFooterColTitle">Features</span>
+          <ul>
+            <li><a href="/#tools">11 Brush Styles</a></li>
+            <li><a href="/#tools">18 Vector Shapes</a></li>
+            <li><a href="/#tools">Coloring Outlines</a></li>
+            <li><a href="/home#hpGuides">Live Classroom Rooms</a></li>
+          </ul>
+        </div>
+
+        <div class="hpFooterCol">
+          <span class="hpFooterColTitle">About & Contact</span>
+          <ul>
+            <li><a href="/home#hpAbout">About coPaint</a></li>
+            <li><a href="/home#hpPrivacy">Privacy Policy</a></li>
+            <li><a href="mailto:gun.yes@proton.me">Email Support</a></li>
+            <li><a href="https://github.com/fiftytwo-52/copaint" target="_blank" rel="noopener noreferrer">GitHub Repository</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="hpFooterCtaBanner">
+      <div class="hpFooterCtaText">
+        <h3>Ready to make your masterpiece?</h3>
+        <p>No downloads, no installations, no sign-ups. Launch right onto the canvas.</p>
+      </div>
+      <a class="hpStart hpBig" href="/">Start Drawing Now</a>
+    </div>
+
+    <div class="hpFooterBottom">
+      <p class="hpFooterCopy">
+        © 2026 <strong>coPaint</strong>. Built with love for little artists and great educators everywhere.
+      </p>
+      <div class="hpFooterSublinks">
+        <a href="/home#hpPrivacy">Privacy Policy</a>
+        <span class="hpFooterDot" aria-hidden="true">•</span>
+        <a href="/home#hpContact">Contact Us</a>
+        <span class="hpFooterDot" aria-hidden="true">•</span>
+        <a href="#homePage" class="hpBackToTop" title="Back to top">
+          Back to top ↑
+        </a>
+      </div>
+    </div>
+  </div>
 </footer>
+

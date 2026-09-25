@@ -199,8 +199,181 @@ kbd {
 .hpMail { color: #2f7bff; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 .hpMail:hover { color: #1e63e0; }
 
-.hpFoot { text-align: center; padding: 40px 10px 16px; }
-.hpFoot p { color: #8b86a8; font-size: 14px; margin: 20px 0 0; font-family: var(--font-body); }
+/* Enhanced Modern Footer */
+.hpFooter {
+  margin-top: 36px;
+  padding: 0 0 24px;
+}
+.hpFooterCard {
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 44px 40px 28px;
+  box-shadow: 0 10px 36px rgba(80, 60, 140, 0.09);
+  border: 1px solid rgba(106, 76, 147, 0.08);
+}
+.hpFooterTop {
+  display: flex;
+  gap: 48px;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  padding-bottom: 36px;
+  border-bottom: 1px solid #f0ecf9;
+}
+.hpFooterBrand {
+  max-width: 330px;
+}
+.hpFooterLogo {
+  font-family: var(--font-brand);
+  font-size: 28px;
+  font-weight: 800;
+  color: #2b2b3a;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  margin-bottom: 12px;
+}
+.hpFooterLogo:focus-visible { outline: 2px solid #2f7bff; outline-offset: 3px; border-radius: 8px; }
+.hpFooterTagline {
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #57536e;
+  margin: 0 0 16px;
+}
+.hpFooterPills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.hpFooterBadge {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  color: #5d4a82;
+  background: #f4f0ff;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid #e7dff7;
+}
+
+.hpFooterCols {
+  display: flex;
+  gap: 36px;
+  flex-wrap: wrap;
+}
+.hpFooterCol {
+  min-width: 130px;
+}
+.hpFooterColTitle {
+  display: block;
+  font-family: var(--font-brand);
+  font-size: 16px;
+  font-weight: 800;
+  color: #2b2b3a;
+  margin-bottom: 14px;
+  letter-spacing: 0.01em;
+}
+.hpFooterCol ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.hpFooterCol li {
+  margin-bottom: 10px;
+}
+.hpFooterCol a {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: #57536e;
+  text-decoration: none;
+  transition: color 0.15s ease, transform 0.12s ease;
+  display: inline-block;
+}
+.hpFooterCol a:hover {
+  color: #2f7bff;
+  transform: translateX(2px);
+}
+.hpFooterCol a:focus-visible { outline: 2px solid #2f7bff; outline-offset: 2px; border-radius: 4px; }
+
+/* Call-to-action banner inside footer */
+.hpFooterCtaBanner {
+  background: linear-gradient(135deg, #f7f4ff 0%, #edf4ff 100%);
+  border-radius: 20px;
+  padding: 24px 28px;
+  margin: 32px 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border: 1px solid rgba(47, 123, 255, 0.15);
+}
+.hpFooterCtaText h3 {
+  font-family: var(--font-brand);
+  font-size: 22px;
+  font-weight: 800;
+  color: #2b2b3a;
+  margin: 0 0 4px;
+}
+.hpFooterCtaText p {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: #57536e;
+  margin: 0;
+}
+.hpFooterCtaBanner .hpStart.hpBig {
+  font-size: 17px;
+  padding: 12px 30px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Bottom copyright & legal */
+.hpFooterBottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 14px;
+}
+.hpFooterCopy {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: #8b86a8;
+  margin: 0;
+}
+.hpFooterCopy strong {
+  color: #4a4763;
+  font-weight: 600;
+}
+.hpFooterSublinks {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hpFooterSublinks a {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: #8b86a8;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.hpFooterSublinks a:hover {
+  color: #2f7bff;
+}
+.hpFooterSublinks a:focus-visible { outline: 2px solid #2f7bff; outline-offset: 2px; }
+.hpFooterDot {
+  color: #d1cbe5;
+  font-size: 12px;
+}
+.hpBackToTop {
+  font-weight: 600;
+  color: #6a4c93 !important;
+}
 
 @media (max-width: 640px) {
   .hpSec { padding: 22px 18px; border-radius: 18px; }
@@ -220,4 +393,25 @@ kbd {
   .hpNav .hpStart { margin-left: auto; font-size: 14px; padding: 8px 18px; }
   .hpKeys tr td:first-child { white-space: normal; width: 55%; }
   .hpKeys td { font-size: 14px; padding: 7px 6px; }
+
+  /* Responsive Footer */
+  .hpFooterCard { padding: 28px 20px 20px; border-radius: 20px; }
+  .hpFooterTop { gap: 28px; }
+  .hpFooterCols { gap: 24px; width: 100%; }
+  .hpFooterCol { width: calc(50% - 12px); min-width: auto; }
+  .hpFooterCtaBanner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+    gap: 16px;
+  }
+  .hpFooterCtaBanner .hpStart.hpBig {
+    width: 100%;
+    text-align: center;
+  }
+  .hpFooterBottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
 }
