@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://copaint-qxc.pages.dev/sitemap.xml
