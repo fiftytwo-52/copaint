@@ -71,6 +71,7 @@ const fullCanonical = canonical.startsWith("http") ? canonical : `${siteUrl}${ca
       "Autosave, PNG export, and multi-page PDF export"
     ]
   })} />
+  <slot name="head" />
 </head>
 <body>
   <slot />

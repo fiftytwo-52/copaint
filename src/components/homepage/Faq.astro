@@ -1,30 +1,54 @@
 ---
-/* Homepage "Frequently asked questions" section. */
+/* Homepage "Frequently asked questions" section with SEO-targeted answers. */
+const faqs = [
+  {
+    q: "Is coPaint free?",
+    a: "Yes — coPaint is completely free with no paywalls, subscriptions, or accounts required. Just open the app and start drawing right away."
+  },
+  {
+    q: "Can I use coPaint as an MS Paint online alternative?",
+    a: "Absolutely! coPaint offers classic Microsoft Paint-style simplicity combined with modern digital art tools: pencil, 11 brush styles, eraser, flood fill (paint bucket) with 9 patterns, 18 vector shapes, text, and sticker tools directly in your browser."
+  },
+  {
+    q: "How does the online whiteboard work for teaching and classrooms?",
+    a: "Teachers can create a room, choose 'Creator mode', and share a random 5-letter code with students. The teacher sees live previews of all student canvases, can draw directly onto any student's board to give guidance, and can download the entire class's artwork as a multi-page PDF."
+  },
+  {
+    q: "Can multiple people draw together on the same canvas?",
+    a: "Yes! By switching room settings to 'Open mode', everyone in the room draws together on a shared collaborative canvas in realtime with zero latency."
+  },
+  {
+    q: "Do I need to sign up or log in?",
+    a: "No registration or login is required. You can draw alone or collaborate in rooms completely anonymously with any display name you choose."
+  },
+  {
+    q: "Where are my drawings saved?",
+    a: "Your artwork is autosaved locally to your browser's internal storage on your device. Nothing is uploaded to any private server or cloud account, keeping your drawings private."
+  },
+  {
+    q: "Does coPaint work offline?",
+    a: "Yes. All drawing tools, shapes, brushes, autosave, PNG export, and PDF export work completely offline. An internet connection is only needed when joining or hosting realtime collaboration rooms."
+  },
+  {
+    q: "How do rooms keep students and kids safe?",
+    a: "Rooms use private 5-letter codes and optional password protection. Room creators (teachers or parents) hold full moderation control: they can pause any participant's drawing or remove them from the room at any time."
+  },
+  {
+    q: "Can I print my drawings or export them as PDF / PNG?",
+    a: "Yes. You can toggle the A4 print-area guide to frame your work for standard paper printing, then export with one tap to high-resolution PNG or PDF."
+  },
+  {
+    q: "Can I use coPaint on PC, Chromebooks, tablets, and phones?",
+    a: "Yes. coPaint runs in any modern web browser across Windows, Mac, Linux, Chromebooks, iPads, tablets, and smartphones without installing any apps or extensions."
+  }
+];
 ---
 <section class="hpSec" id="hpFaq">
   <h2>Frequently asked questions</h2>
-  <div class="hpFaq">
-    <h3>Is coPaint free?</h3>
-    <p>Yes — completely free, with no accounts and no sign-up.</p>
-  </div>
-  <div class="hpFaq">
-    <h3>Do I need to sign up?</h3>
-    <p>No. Just open the app and start drawing.</p>
-  </div>
-  <div class="hpFaq">
-    <h3>Where are my drawings saved?</h3>
-    <p>On your own device, inside your browser. Nothing is uploaded to any server.</p>
-  </div>
-  <div class="hpFaq">
-    <h3>Does it work offline?</h3>
-    <p>Drawing, saving and exporting work offline. Collaboration rooms need an internet connection.</p>
-  </div>
-  <div class="hpFaq">
-    <h3>How do rooms keep kids safe?</h3>
-    <p>Room codes are random 5-letter codes and rooms can be password protected. The creator can pause anyone's drawing or remove anyone from the room at any time.</p>
-  </div>
-  <div class="hpFaq">
-    <h3>Can I print my drawing?</h3>
-    <p>Yes — turn on the A4 guide to see the print area, then save as PNG or PDF and print it.</p>
-  </div>
+  {faqs.map(item => (
+    <div class="hpFaq">
+      <h3>{item.q}</h3>
+      <p>{item.a}</p>
+    </div>
+  ))}
 </section>

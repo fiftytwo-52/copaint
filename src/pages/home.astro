@@ -18,6 +18,93 @@ import '../styles/homepage.css';
   keywords="online whiteboard, free online whiteboard for teaching, digital whiteboard, collaborative paint online, ms paint online free, whiteboard app, draw together online whiteboard, free paint tool online, online paint app"
   canonical="/home"
 >
+  <!-- FAQPage Schema for Rich Search Snippets -->
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is coPaint free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes — coPaint is completely free with no paywalls, subscriptions, or accounts required. Just open the app and start drawing right away."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use coPaint as an MS Paint online alternative?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Absolutely! coPaint offers classic Microsoft Paint-style simplicity combined with modern digital art tools: pencil, 11 brush styles, eraser, flood fill (paint bucket) with 9 patterns, 18 vector shapes, text, and sticker tools directly in your browser."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the online whiteboard work for teaching and classrooms?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Teachers can create a room, choose 'Creator mode', and share a random 5-letter code with students. The teacher sees live previews of all student canvases, can draw directly onto any student's board to give guidance, and can download the entire class's artwork as a multi-page PDF."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can multiple people draw together on the same canvas?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes! By switching room settings to 'Open mode', everyone in the room draws together on a shared collaborative canvas in realtime with zero latency."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need to sign up or log in?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No registration or login is required. You can draw alone or collaborate in rooms completely anonymously with any display name you choose."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Where are my drawings saved?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Your artwork is autosaved locally to your browser's internal storage on your device. Nothing is uploaded to any private server or cloud account, keeping your drawings private."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does coPaint work offline?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. All drawing tools, shapes, brushes, autosave, PNG export, and PDF export work completely offline. An internet connection is only needed when joining or hosting realtime collaboration rooms."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do rooms keep students and kids safe?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Rooms use private 5-letter codes and optional password protection. Room creators (teachers or parents) hold full moderation control: they can pause any participant's drawing or remove them from the room at any time."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I print my drawings or export them as PDF / PNG?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. You can toggle the A4 print-area guide to frame your work for standard paper printing, then export with one tap to high-resolution PNG or PDF."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use coPaint on PC, Chromebooks, tablets, and phones?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. coPaint runs in any modern web browser across Windows, Mac, Linux, Chromebooks, iPads, tablets, and smartphones without installing any apps or extensions."
+        }
+      }
+    ]
+  })} />
   <div id="homePage">
     <div class="hpInner">
       <Nav />
