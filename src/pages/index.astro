@@ -132,6 +132,13 @@ const title = "coPaint";
     #stickerPop { max-width: 252px; }
     #fontPop { grid-template-columns: 1fr; min-width: 168px; }
     #fontPop button { justify-content: flex-start; height: auto; padding: 8px 12px; }
+    /* text background color row in the font popover */
+    #fontPop .bgRow { display: flex; gap: 8px; align-items: center; padding: 10px 12px; border-top: 2px dashed #e6e1f5; margin-top: 4px; }
+    #fontPop .bgRow .bgLab { font-size: 12px; font-weight: 800; color: #8b86a8; }
+    #fontPop .bgPick { width: 34px; height: 28px; border: 2px solid #e6e1f5; border-radius: 8px; padding: 1px; background: #fff; cursor: pointer; }
+    #fontPop button.bgNone { width: 34px; height: 28px; border: 2px solid #e6e1f5; border-radius: 8px; cursor: pointer; padding: 0; justify-content: center;
+      background: linear-gradient(135deg, #ffffff 44%, #e05252 44%, #e05252 56%, #ffffff 56%); }
+    #fontPop button.bgNone.on { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(122,90,220,.25); }
     #strokePop, #fillStylePop { grid-template-columns: 1fr; }
     #exportPop { grid-template-columns: 1fr; min-width: 170px; }
     #bgPop { grid-template-columns: repeat(4, 1fr); }
@@ -159,18 +166,9 @@ const title = "coPaint";
     #colorPop .opwrap span { font-size: 11px; font-weight: 700; color: #8888a0; white-space: nowrap; }
     #colorPop .opwrap input[type="range"] { flex: 1; accent-color: var(--accent); cursor: pointer; }
     #colorPop .opval { font-size: 11px; font-weight: 700; color: #55556a; min-width: 34px; text-align: right; }
-    /* blue save-picture button floating at the canvas top-right */
-    #saveImgBtn {
-      position: absolute; top: 10px; right: 174px; z-index: 15;
-      width: 44px; height: 44px; border-radius: 12px; border: 2px solid #bcdcff;
-      background: #fff; cursor: pointer; padding: 6px;
-      box-shadow: 0 2px 8px rgba(47,123,255,.25); transition: transform .08s;
-    }
-    #saveImgBtn:hover { transform: scale(1.08); }
-    #saveImgBtn svg { width: 100%; height: 100%; display: block; }
-    /* paper color/pattern button floating at the canvas top-right, left of save */
+    /* paper color/pattern button floating at the canvas top-right */
     #paperBtn {
-      position: absolute; top: 10px; right: 228px; z-index: 15;
+      position: absolute; top: 10px; right: 174px; z-index: 15;
       width: 44px; height: 44px; border-radius: 12px; border: 2px solid #e3dcff;
       background: #fff; cursor: pointer; padding: 6px;
       box-shadow: 0 2px 8px rgba(80,60,140,.18); transition: transform .08s;
@@ -178,6 +176,22 @@ const title = "coPaint";
     #paperBtn:hover { transform: scale(1.08); }
     #paperBtn svg { width: 100%; height: 100%; display: block; }
     /* A4 print-area toggle, bottom-right of the canvas */
+    /* dismissible "works better on pc" notice shown on phones */
+    #pcNote {
+      position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 60;
+      display: flex; align-items: center; gap: 10px;
+      background: #2b2b3a; color: #fff; font-size: 13px; font-weight: 600;
+      padding: 10px 10px 10px 16px; border-radius: 999px; white-space: nowrap;
+      max-width: calc(100vw - 32px); box-shadow: 0 6px 20px rgba(0,0,0,.28);
+    }
+    #pcNote[hidden] { display: none; }
+    #pcNoteX {
+      width: 26px; height: 26px; border-radius: 50%; border: none; padding: 0;
+      background: rgba(255,255,255,.18); color: #fff; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #pcNoteX:hover { background: rgba(255,255,255,.32); }
+    #pcNoteX svg { width: 12px; height: 12px; }
     #a4Btn {
       position: absolute; bottom: 12px; right: 12px; z-index: 15;
       width: 44px; height: 44px; border-radius: 12px; border: 2px solid #e3dcff;
@@ -332,12 +346,30 @@ const title = "coPaint";
       position: fixed; left: auto; right: 12px; top: 12px; bottom: 124px; width: 248px; z-index: 45;
       background: #fff; border-radius: 18px; box-shadow: 0 8px 30px rgba(80,60,140,.25);
       display: flex; flex-direction: column; overflow: hidden;
+      cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
     }
+    #tPanel:active { cursor: grabbing; }
+    #tPanel #tCards { touch-action: pan-y; cursor: default; }
     #tPanel .tpHead { padding: 10px 12px 8px; border-bottom: 2px solid #f0edf9; }
     #tPanel .tpCodeRow { display: flex; align-items: center; gap: 6px; }
     #tPanel .tpCode {
       font-size: 22px; font-weight: 900; letter-spacing: 4px; color: #2b2b3a; cursor: pointer;
     }
+    #tPanel .tpFoldBtn {
+      margin-left: auto; width: 30px; height: 30px; flex-shrink: 0;
+      border: 1.5px solid #e7e4f0; background: #fff; border-radius: 9px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; padding: 0;
+    }
+    #tPanel .tpFoldBtn:hover { border-color: #2b2b3a; }
+    #tPanel .tpFoldBtn svg { width: 14px; height: 14px; transition: transform .15s; }
+    #tPanel.collapsed { bottom: auto; width: max-content; max-width: calc(100vw - 16px); }
+    #tPanel.collapsed .tpCount { display: none; }
+    #tPanel.collapsed .tpModeRow,
+    #tPanel.collapsed .tpBtns,
+    #tPanel.collapsed #tCards,
+    #tPanel.collapsed #tOpenList,
+    #tPanel.collapsed #tLog { display: none; }
+    #tPanel.collapsed .tpFoldBtn svg { transform: rotate(180deg); }
     #tPanel .tpCount { font-size: 12px; color: #6b6884; font-weight: 700; }
     #tPanel .tpBtns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
     #tPanel .tpBtns button {
@@ -423,13 +455,27 @@ const title = "coPaint";
     #cbTextWrap button { border: none; border-radius: 10px; padding: 8px 14px; font-weight: 800; font-size: 13px; cursor: pointer; }
     #cbTextOk { background: #2f7bff; color: #fff; }
     #cbTextCancel { background: #efecf9; color: #57536e; }
+    #cbTextWrap .bgPick { width: 36px; height: 36px; border: 2px solid #e6e1f5; border-radius: 10px; padding: 2px; background: #fff; cursor: pointer; flex: none; }
+    #cbTextWrap button.bgNone { width: 36px; height: 36px; border: 2px solid #e6e1f5; border-radius: 10px; cursor: pointer; flex: none; padding: 0;
+      background: linear-gradient(135deg, #ffffff 44%, #e05252 44%, #e05252 56%, #ffffff 56%); }
+    #cbTextWrap button.bgNone.on { border-color: #2f7bff; box-shadow: 0 0 0 2px rgba(47,123,255,.25); }
 
     /* student room bar */
     #sBar {
       position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 45;
       display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 999px;
       padding: 7px 8px 7px 14px; box-shadow: 0 6px 24px rgba(80,60,140,.25); font-size: 13px; font-weight: 800; color: #2b2b3a;
+      cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
     }
+    #sBar:active { cursor: grabbing; }
+    #sBar .sFoldBtn {
+      width: 28px; height: 28px; flex-shrink: 0; border: 1.5px solid #e7e4f0; background: #fff;
+      border-radius: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+    }
+    #sBar .sFoldBtn:hover { border-color: #2b2b3a; }
+    #sBar .sFoldBtn svg { width: 13px; height: 13px; transition: transform .15s; }
+    #sBar.collapsed #sTeacher, #sBar.collapsed #sFriendsBtn, #sBar.collapsed #sLeaveBtn { display: none; }
+    #sBar.collapsed .sFoldBtn svg { transform: rotate(180deg); }
     #sBar .sCode { background: #f4f2fb; border-radius: 999px; padding: 3px 10px; letter-spacing: 2px; }
     #sPaused {
       background: #fff7e6; color: #b7791f; border: 2px solid #f5d98b; border-radius: 999px;
@@ -556,7 +602,10 @@ const title = "coPaint";
         flex-direction: column; align-items: stretch;
         overflow-x: hidden; overflow-y: auto;
         padding: 8px 6px; gap: 2px; border-radius: 16px;
+        scrollbar-width: none; /* phone: scrollable but no visible scrollbar */
+        -ms-overflow-style: none;
       }
+      #toolbar::-webkit-scrollbar { display: none; }
       #toolbar .group {
         display: grid; grid-template-columns: 1fr 1fr; place-items: center;
         gap: 5px; padding: 6px 2px; max-width: none; overflow: visible;
@@ -571,15 +620,20 @@ const title = "coPaint";
       #sizeRow #size { height: 80px; }
       #colorDot { width: 38px; height: 38px; flex: 0 0 auto; }
       #nameInput { width: 104px; font-size: 13px; padding: 7px 8px; }
-      #saveImgBtn { right: 128px; width: 40px; height: 40px; }
-      #paperBtn { right: 176px; width: 40px; height: 40px; }
+      #paperBtn { right: 128px; width: 40px; height: 40px; }
       #a4Btn { bottom: 12px; right: 8px; width: 40px; height: 40px; }
       #infoBtn { bottom: 60px; right: 8px; width: 40px; height: 40px; }
       #zoomBar { bottom: 12px; }
       #tPanel { left: 8px; right: 8px; top: 8px; bottom: auto; width: auto; max-height: 52vh; }
+      #tPanel.collapsed { right: auto; } /* shrink to a small pill instead of full-width bar */
       #sBar { max-width: 96vw; flex-wrap: wrap; justify-content: center; font-size: 12px; border-radius: 18px; }
       #sFriends { top: auto; bottom: 120px; }
-      .popover { max-width: calc(100vw - 16px); }
+      .popover {
+        max-width: calc(100vw - 16px);
+        max-height: calc(100vh - 24px); /* phone: popovers scroll instead of clipping */
+        max-height: calc(100dvh - 24px);
+        overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+      }
       .cbBox { width: calc(100vw - 24px); }
     }
     /* short screens: shrink so the whole toolbar still fits without scrolling */
@@ -684,9 +738,6 @@ const title = "coPaint";
         <span class="group-label">Page</span>
         <svg class="foldchev" viewBox="0 0 24 24"><path d="M6 9.5l6 6.5 6-6.5z" fill="#57536e"/></svg>
       </button>
-      <button class="act" id="save" title="Save">
-        <svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5V4z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linejoin="round"/><rect x="8" y="4" width="7" height="5" fill="none" stroke="#2b2b3a" stroke-width="1.8"/><rect x="8" y="14" width="8" height="6" fill="none" stroke="#2b2b3a" stroke-width="1.8"/></svg>
-      </button>
       <button class="act" id="download" title="Download as picture">
         <svg viewBox="0 0 24 24"><path d="M12 4v10.5M7.5 10.5L12 15l4.5-4.5" fill="none" stroke="#2b2b3a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 20h14" stroke="#2b2b3a" stroke-width="2.4" stroke-linecap="round"/></svg>
       </button>
@@ -699,6 +750,11 @@ const title = "coPaint";
       <input type="color" id="bgPicker" value="#ffffff" hidden />
     </div>
   </header>
+
+  <div id="pcNote" hidden>
+    <span>copaint works better on pc</span>
+    <button id="pcNoteX" title="Close" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+  </div>
 
   <div id="shapePop" class="popover" hidden></div>
   <div id="stickerPop" class="popover" hidden></div>
@@ -731,9 +787,6 @@ const title = "coPaint";
     <a id="infoBtn" title="About coPaint" href="/home">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#2f7bff"/><path d="M12 11v6" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.6" fill="#ffffff"/></svg>
     </a>
-    <button id="saveImgBtn" title="Save picture">
-      <svg viewBox="0 0 24 24"><path d="M5 3h11l4 4v12a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" fill="#2f7bff" stroke="#1e56c8" stroke-width="2" stroke-linejoin="round"/><path d="M8 3v5h7V3" fill="#bcdcff" stroke="#1e56c8" stroke-width="1.6" stroke-linejoin="round"/><rect x="8" y="13" width="8" height="6" rx="1" fill="#fff" stroke="#1e56c8" stroke-width="1.8"/></svg>
-    </button>
     <input id="nameInput" placeholder="Your name" maxlength="30" autocomplete="off" />
     <div id="textEditWrap" hidden>
       <div id="textEditGrip" title="Drag to move the text box">
@@ -852,6 +905,7 @@ const FONTS = [
   { id: 'type', name: 'Typewriter', stack: '"Courier New",Courier,monospace' },
 ];
 let textFont = FONTS[0].stack;  // active font for new text
+let textBg = null;              // background fill for text boxes; null = transparent
 let bg = '#ffffff';
 let bgPattern = 'plain'; // plain | ruled | graph | dots | numbered — paper pattern drawn over bg
 let showA4 = false;       // A4 print-area guide overlay (bottom-right toggle)
@@ -876,7 +930,7 @@ function saveState() {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify({
       v: 3, bg, bgPattern, showA4, color, size, opacity, dash, fillColor, fillStyle, fillShapes,
-      shapeKind, stickerId, stickerMode, outlineId, emojiChar, brushType, textFont, view, zoom,
+      shapeKind, stickerId, stickerMode, outlineId, emojiChar, brushType, textFont, textBg, view, zoom,
       toolbarCollapsed: toolbar.classList.contains('collapsed'),
       toolbarPos,
       foldedGroups: [...document.querySelectorAll('#toolbar .group.folded')].map(g => g.dataset.gid),
@@ -900,6 +954,7 @@ if (saved) {
   if (saved.emojiChar) emojiChar = saved.emojiChar;
   brushType = saved.brushType || brushType;
   if (saved.textFont && FONTS.some(f => f.stack === saved.textFont)) textFont = saved.textFont;
+  if (typeof saved.textBg === 'string') textBg = saved.textBg;
   if (saved.view) view = saved.view;
   if (saved.zoom) zoom = Math.max(0.25, Math.min(4, saved.zoom));
 }
@@ -1624,6 +1679,11 @@ function fixPendingText(selectAfter) {
 function drawText(c, it) {
   c.font = `700 ${it.s * 3}px ${it.font || FONT_STACK}`;
   c.textAlign = 'left'; c.textBaseline = 'top';
+  if (it.bg) {
+    const w = c.measureText(it.text).width;
+    c.fillStyle = it.bg;
+    c.fillRect(it.x - 4, it.y - 4, w + 8, it.s * 3 + 8);
+  }
   c.fillStyle = it.color;
   c.fillText(it.text, it.x, it.y);
 }
@@ -2661,6 +2721,8 @@ let textAnchor = null;
 function openTextEditor(p, item) {
   editingText = item || null;
   textAnchor = item ? null : p;
+  textBg = item ? (item.bg || null) : textBg; // re-editing loads the box's bg; new keeps last choice
+  buildFontPop();
   textEditWrap.hidden = false;
   textEdit.value = item ? item.text : '';
   const fx = item ? item.x : p.x, fy = item ? item.y : p.y;
@@ -2680,12 +2742,12 @@ function closeTextEditor(commitIt = true) {
   editingText = null;
   if (!commitIt || !t) { redraw(); return; }
   if (item) {
-    item.text = t;                  // re-editing an existing text item
+    item.text = t; item.bg = textBg;   // re-editing an existing text item
     redraw(); saveState();
     return;
   }
   if (p) {
-    pendingText = { type: 'text', text: t, x: p.x, y: p.y, s: size, color, alpha: opacity, font: textFont };
+    pendingText = { type: 'text', text: t, x: p.x, y: p.y, s: size, color, alpha: opacity, font: textFont, bg: textBg };
     selected = pendingText;         // stays editable until you click outside
     redraw(); saveState();
   }
@@ -2856,6 +2918,27 @@ function buildFontPop() {
     b.onclick = () => { textFont = f.stack; if (pendingText) pendingText.font = textFont; buildFontPop(); refreshToolIcons(); redraw(); saveState(); };
     fontPop.appendChild(b);
   }
+  // background color for text boxes
+  const bgRow = document.createElement('div');
+  bgRow.className = 'bgRow';
+  const bgLab = document.createElement('span');
+  bgLab.className = 'bgLab'; bgLab.textContent = 'Background';
+  const bgPick = document.createElement('input');
+  bgPick.type = 'color'; bgPick.className = 'bgPick'; bgPick.title = 'Text background color';
+  bgPick.value = textBg || '#ffffff';
+  const bgNone = document.createElement('button');
+  bgNone.type = 'button'; bgNone.className = 'bgNone' + (textBg ? '' : ' on'); bgNone.title = 'No background';
+  const applyBg = (v) => {
+    textBg = v;
+    bgPick.value = textBg || '#ffffff';
+    bgNone.classList.toggle('on', !textBg);
+    if (pendingText) { pendingText.bg = textBg; redraw(); } // recolor the not-yet-fixed box live
+    saveState();
+  };
+  bgPick.addEventListener('input', () => applyBg(bgPick.value));
+  bgNone.addEventListener('click', () => applyBg(null));
+  bgRow.append(bgLab, bgPick, bgNone);
+  fontPop.appendChild(bgRow);
 }
 
 function buildPops() {
@@ -3149,8 +3232,6 @@ function holdRepeat(btn, fn) {
 holdRepeat(sizeMinus, () => setSize(size - 2));
 holdRepeat(sizePlus, () => setSize(size + 2));
 
-document.getElementById('saveImgBtn').addEventListener('click', () => downloadPNG());
-
 /* ---------------- fill tools: floating bar, only while a shape is selected ---------------- */
 const shapeFillBar = document.getElementById('shapeFillBar');
 const shapeFillColors = document.getElementById('shapeFillColors');
@@ -3385,8 +3466,6 @@ function renderA4PageURL(r) {
 if (saved && saved.name) nameInput.value = saved.name;
 nameInput.addEventListener('input', saveState);
 
-document.getElementById('save').onclick = () => { saveState(); toast('Saved'); };
-
 /* export renders the current viewport */
 function renderExportURL() {
   const out = document.createElement('canvas');
@@ -3471,12 +3550,17 @@ document.addEventListener('keydown', (e) => {
     selected = null; redoStack.length = 0;
     redraw(); saveState();
     syncDel(_delId2);
+  } else if ((e.key === 'Delete' || e.key === 'Backspace') && !selected && collab.tSel && collab.drawMode) {
+    // delete the teacher's selected overlay item on the student's canvas
+    e.preventDefault();
+    deleteTeacherSel();
   } else if (e.key === 'Escape') {
     if (pendingShape) { commitPending(false); redraw(); }
     else if (pendingText) { fixPendingText(false); redraw(); }
     else if (pendingOutline) { pendingOutline = null; selected = null; redraw(); }
     else if (pendingSticker) { pendingSticker = null; selected = null; redraw(); }
     else if (selected || areaSel) { selected = null; areaSel = null; redraw(); }
+    else if (collab.tSel) { collab.tSel = null; collab.tHandle = null; paintOverlayMarks(); markCbTools(); }
   }
 });
 
@@ -3656,6 +3740,10 @@ const collab = {
   bigSid: null, // student currently enlarged (teacher)
   bigTimer: null, // hi-res preview loop while the big view is open
   tMarks: [], // teacher's shipped marks awaiting the next live preview (local echo)
+  tSeq: 0, // teacher-side item ids for the draw-on-student overlay
+  tSel: null, // teacher's selected overlay item (select tool)
+  tHandle: null, // resize-handle position for the selected overlay item
+  tEditTid: null, // overlay text item currently being re-edited
   cbTextAt: null, // anchor point for the modal's inline text editor
   drawMode: false,
   friendWatch: null, // student-side friend viewer state
@@ -3970,9 +4058,9 @@ function onTeacherMsg(topic, m) {
     if (collab.bigSid === m.sid) {
       const bi = document.getElementById('cbBigImg');
       if (bi) { bi.style.display = ''; bi.src = m.img; }
-      // the fresh hi-res frame includes anything the teacher shipped — drop the local echo
-      collab.tMarks = [];
-      clearDrawOverlay();
+      // tMarks persist as the teacher's editable overlay items (select/move/resize/delete);
+      // the fresh frame already includes anything shipped, drawn underneath at the same spot
+      paintOverlayMarks();
       const note = document.getElementById('cbBigNote');
       if (note) note.textContent = 'Live view — turn on Draw to sketch on ' + s.name + "'s canvas.";
       const db = document.getElementById('cbDrawBtn'); if (db) db.disabled = false;
@@ -4036,7 +4124,8 @@ function buildTeacherUI() {
   ui.innerHTML =
     '<div id="tPanel">' +
       '<div class="tpHead"><div class="tpCodeRow"><span class="tpCode" id="tpCode" title="Tap to copy">' + escHtml(collab.code) + '</span>' +
-      '<span class="tpCount" id="tpCount">0 collaborators</span></div>' +
+      '<span class="tpCount" id="tpCount">0 collaborators</span>' +
+      '<button class="tpFoldBtn" id="tpFold" title="Collapse panel"><svg viewBox="0 0 24 24"><path d="M6 14l6-6 6 6" fill="none" stroke="#2b2b3a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>' +
       '<div class="tpModeRow"><button id="tpModeSolo" class="tpMode on">Creator mode</button>' +
       '<button id="tpModeOpen" class="tpMode">Open mode</button></div>' +
       '<div class="tpBtns"><button id="tpSend">Send my canvas to all</button>' +
@@ -4051,9 +4140,52 @@ function buildTeacherUI() {
       '<div class="cbTools" id="cbTools" hidden></div>' +
       '<div class="cbStage"><img id="cbBigImg" alt=""><canvas id="cbDrawLayer" hidden></canvas></div>' +
       '<div id="cbTextWrap" hidden><input id="cbTextInput" placeholder="Type text, then Add" maxlength="140" autocomplete="off">' +
+      '<input type="color" id="cbTextBgPick" class="bgPick" value="#ffffff" title="Text background color">' +
+      '<button type="button" id="cbTextBgNone" class="bgNone on" title="No background"></button>' +
       '<button id="cbTextOk">Add</button><button id="cbTextCancel">Cancel</button></div>' +
       '<div class="cbNote" id="cbBigNote"></div>' +
     '</div></div>';
+  /* fold / unfold the teacher panel */
+  const tPanel = document.getElementById('tPanel');
+  const tpFold = document.getElementById('tpFold');
+  tpFold.onclick = () => {
+    const c = tPanel.classList.toggle('collapsed');
+    tpFold.title = c ? 'Expand panel' : 'Collapse panel';
+    tPanel.style.height = ''; // let it shrink-wrap the visible part
+  };
+  /* drag the teacher panel by grabbing it anywhere except buttons, inputs and the scrolling card list */
+  (() => {
+    let drag = null, suppressClick = false;
+    tPanel.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('button, input, textarea, select, a, #tCards, #tOpenList, #tLog')) return;
+      const r = tPanel.getBoundingClientRect();
+      drag = { dx: e.clientX - r.left, dy: e.clientY - r.top, moved: false };
+      tPanel.style.left = r.left + 'px';
+      tPanel.style.top = r.top + 'px';
+      tPanel.style.height = r.height + 'px';
+      tPanel.style.right = 'auto';
+      tPanel.style.bottom = 'auto';
+      try { tPanel.setPointerCapture(e.pointerId); } catch {}
+    });
+    tPanel.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      if (Math.abs(e.clientX - drag.dx - parseFloat(tPanel.style.left)) > 6 ||
+          Math.abs(e.clientY - drag.dy - parseFloat(tPanel.style.top)) > 6) drag.moved = true;
+      tPanel.style.left = Math.max(0, Math.min(window.innerWidth - 60, e.clientX - drag.dx)) + 'px';
+      tPanel.style.top = Math.max(0, Math.min(window.innerHeight - 40, e.clientY - drag.dy)) + 'px';
+    });
+    const stop = () => {
+      suppressClick = !!(drag && drag.moved);
+      drag = null;
+      if (suppressClick) setTimeout(() => { suppressClick = false; }, 0);
+    };
+    tPanel.addEventListener('pointerup', stop);
+    tPanel.addEventListener('pointercancel', stop);
+    // a drag ending on the room code shouldn't trigger "copy code"
+    tPanel.addEventListener('click', (e) => {
+      if (suppressClick) { e.stopPropagation(); e.preventDefault(); }
+    }, true);
+  })();
   document.getElementById('tpCode').onclick = () => {
     const done = () => toast('Code copied — share it with collaborators');
     try {
@@ -4072,10 +4204,12 @@ function buildTeacherUI() {
   buildCbTools();
   document.getElementById('cbTextOk').onclick = commitCbText;
   document.getElementById('cbTextCancel').onclick = () => { document.getElementById('cbTextWrap').hidden = true; collab.cbTextAt = null; };
+  document.getElementById('cbTextBgPick').oninput = (e) => { textBg = e.target.value; syncCbTextBgUI(); };
+  document.getElementById('cbTextBgNone').onclick = () => { textBg = null; syncCbTextBgUI(); };
   document.getElementById('cbTextInput').addEventListener('keydown', (e) => {
     e.stopPropagation();
     if (e.key === 'Enter') commitCbText();
-    else if (e.key === 'Escape') { document.getElementById('cbTextWrap').hidden = true; collab.cbTextAt = null; }
+    else if (e.key === 'Escape') { document.getElementById('cbTextWrap').hidden = true; collab.cbTextAt = null; collab.tEditTid = null; }
   });
   refreshTeacherPanel();
 }
@@ -4083,11 +4217,14 @@ function buildTeacherUI() {
    sits behind the modal, so tools are switched here; it drives the same `tool`,
    `color`, `size` globals the main canvas uses */
 const CB_STRIP = [
+  ['select', 'Select / move / resize', '<svg viewBox="0 0 24 24"><path d="M12 3v18M12 3L8.6 6.4M12 3l3.4 3.4M12 21l-3.4-3.4M12 21l3.4-3.4M3 12h18M3 12l3.4-3.4M3 12l3.4 3.4M21 12l-3.4-3.4M21 12l-3.4 3.4" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
   ['pencil', 'Pencil', '<svg viewBox="0 0 24 24"><path d="M4 20l1.2-4.2L16.7 4.3a2.1 2.1 0 013 3L8.2 18.8 4 20z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linejoin="round"/><path d="M14.8 6.2l3 3" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round"/></svg>'],
   ['brush', 'Brush', '<svg viewBox="0 0 24 24"><path d="M14 5l5 5L9 20l-5-5L14 5z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linejoin="round"/><path d="M9 20c-1.5.6-3.6-.4-4.2-2.4" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round"/></svg>'],
   ['highlighter', 'Highlighter', '<svg viewBox="0 0 24 24"><path d="M13.5 4.5l6 6L11 19H5v-6l8.5-8.5z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linejoin="round"/><path d="M5 19l-2 2" stroke="#2b2b3a" stroke-width="2.4" stroke-linecap="round"/></svg>'],
   ['eraser', 'Eraser', '<svg viewBox="0 0 24 24"><path d="M7.5 19.5l-4-4a1.6 1.6 0 010-2.3l8.7-8.7a1.6 1.6 0 012.3 0l4.9 4.9a1.6 1.6 0 010 2.3l-6.6 6.6-5.3 1.2z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linejoin="round"/></svg>'],
   ['shape', 'Shape', '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#2b2b3a" stroke-width="2"/></svg>'],
+  ['line', 'Line', '<svg viewBox="0 0 24 24"><path d="M5 19L19 5" fill="none" stroke="#2b2b3a" stroke-width="2.2" stroke-linecap="round"/></svg>'],
+  ['arrow', 'Arrow', '<svg viewBox="0 0 24 24"><path d="M4 20L18 6M12 6h6v6" fill="none" stroke="#2b2b3a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
   ['text', 'Text', '<svg viewBox="0 0 24 24"><path d="M5 6V4h14v2M12 4v16M9 20h6" fill="none" stroke="#2b2b3a" stroke-width="2.2" stroke-linecap="round"/></svg>'],
   ['sticker', 'Sticker', '<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.8 6.3.7-4.7 4.3 1.3 6.2-5.6-3.1L6.4 20l1.3-6.2L3 9.5l6.3-.7L12 3z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linejoin="round"/></svg>'],
   ['bucket', 'Fill', '<svg viewBox="0 0 24 24"><path d="M5 12l7-7 7 7-7 7-7-7z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linejoin="round"/><path d="M17 17c.6 2-.3 3.6-2.3 4.2" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round"/></svg>'],
@@ -4097,11 +4234,13 @@ function buildCbTools() {
   let h = '';
   for (const [t, title, svg] of CB_STRIP) h += '<button data-t="' + t + '" title="' + title + '">' + svg + '</button>';
   h += '<span class="cbSep"></span><input type="color" id="cbColor" title="Color" value="#2b2b3a">' +
-    '<span class="cbSizeLab">Size</span><input type="range" id="cbSize" min="2" max="80" step="1" value="12" title="Size">';
+    '<span class="cbSizeLab">Size</span><input type="range" id="cbSize" min="2" max="80" step="1" value="12" title="Size">' +
+    '<button id="cbDel" title="Delete selected" hidden><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="#c62828" stroke-width="2.4" stroke-linecap="round"/></svg></button>';
   wrap.innerHTML = h;
   wrap.querySelectorAll('button[data-t]').forEach((b) => {
     b.onclick = () => { setTool(b.dataset.t); markCbTools(); };
   });
+  document.getElementById('cbDel').onclick = () => deleteTeacherSel();
   const cc = document.getElementById('cbColor');
   cc.value = /^#[0-9a-f]{6}$/i.test(color) ? color : '#2b2b3a';
   cc.oninput = () => { color = cc.value; };
@@ -4113,19 +4252,36 @@ function buildCbTools() {
 function markCbTools() {
   const wrap = document.getElementById('cbTools'); if (!wrap) return;
   wrap.querySelectorAll('button[data-t]').forEach((b) => b.classList.toggle('on', b.dataset.t === tool));
+  const del = document.getElementById('cbDel'); if (del) del.hidden = !collab.tSel;
+}
+/* reflect the shared textBg choice in the collaborator text editor's swatches */
+function syncCbTextBgUI() {
+  const pick = document.getElementById('cbTextBgPick');
+  const none = document.getElementById('cbTextBgNone');
+  if (!pick || !none) return;
+  pick.value = textBg || '#ffffff';
+  none.classList.toggle('on', !textBg);
 }
 function commitCbText() {
   const inp = document.getElementById('cbTextInput');
   const t = inp.value.trim();
   document.getElementById('cbTextWrap').hidden = true;
-  const at = collab.cbTextAt; collab.cbTextAt = null;
-  if (!t || !at) return;
-  shipTeacherItem({ type: 'text', text: t, x: at.x, y: at.y, s: size, color, alpha: opacity, font: textFont });
+  const at = collab.cbTextAt, editTid = collab.tEditTid;
+  collab.cbTextAt = null; collab.tEditTid = null;
+  if (!t) { inp.value = ''; return; }
+  if (editTid) {
+    // re-editing a placed textbox — update it in place on both sides
+    const it = collab.tMarks.find((m) => m.tid === editTid);
+    if (it) { it.text = t; it.bg = textBg; publishTUpdate(editTid, { text: t, bg: textBg }); }
+    inp.value = ''; return;
+  }
+  if (!at) return;
+  shipTeacherItem({ type: 'text', text: t, x: at.x, y: at.y, s: size, color, alpha: opacity, font: textFont, bg: textBg });
   inp.value = '';
 }
 function openBig(sid) {
   const s = collab.students.get(sid); if (!s) return;
-  collab.bigSid = sid; collab.tMarks = []; setDrawMode(false);
+  collab.bigSid = sid; collab.tMarks = []; collab.tSel = null; collab.tHandle = null; setDrawMode(false);
   document.getElementById('cbBigName').textContent = s.name;
   const img = document.getElementById('cbBigImg');
   if (s.img) { img.style.display = ''; img.src = s.img; } else img.style.display = 'none';
@@ -4142,7 +4298,7 @@ function openBig(sid) {
 function closeBig() {
   const m = document.getElementById('cbBig'); if (m) m.hidden = true;
   clearInterval(collab.bigTimer); collab.bigTimer = null;
-  collab.bigSid = null; collab.tMarks = []; collab.cbTextAt = null;
+  collab.bigSid = null; collab.tMarks = []; collab.tSel = null; collab.tHandle = null; collab.cbTextAt = null; collab.tEditTid = null;
   const tw = document.getElementById('cbTextWrap'); if (tw) tw.hidden = true;
   setDrawMode(false);
 }
@@ -4150,11 +4306,36 @@ function closeBig() {
 function shipTeacherItem(item) {
   const s = collab.students.get(collab.bigSid);
   if (!s || !collab.mqtt) return;
+  item.tid = 't' + (++collab.tSeq); // lets later moves/resizes/deletes find this item
   try { collab.mqtt.pub(roomTopic('d/' + s.sid), { k: 't-draw', item }); } catch (e) {}
   collab.tMarks.push(item); // instant local echo until the next live preview arrives
   paintOverlayMarks();
   const pill = document.getElementById('tDrawingPill');
   if (pill) { pill.textContent = 'Drawing on ' + s.name + "'s canvas…"; pill.hidden = false; clearTimeout(pill._t); pill._t = setTimeout(() => { pill.hidden = true; }, 2500); }
+}
+/* push a geometry/text change for one of the teacher's overlay items to the student */
+function publishTUpdate(tid, patch) {
+  const s = collab.students.get(collab.bigSid);
+  if (!s || !collab.mqtt || !tid || !patch) return;
+  try { collab.mqtt.pub(roomTopic('d/' + s.sid), { k: 't-update', tid, patch }); } catch (e) {}
+  paintOverlayMarks();
+}
+/* delete the teacher's selected overlay item from both sides */
+function deleteTeacherSel() {
+  const it = collab.tSel; if (!it) return;
+  const s = collab.students.get(collab.bigSid);
+  collab.tMarks = collab.tMarks.filter((m) => m.tid !== it.tid);
+  collab.tSel = null; collab.tHandle = null;
+  if (s && collab.mqtt) { try { collab.mqtt.pub(roomTopic('d/' + s.sid), { k: 't-del', tid: it.tid }); } catch (e) {} }
+  paintOverlayMarks(); markCbTools();
+}
+/* re-edit the text of a placed textbox (double-tap it with the select tool) */
+function openCbTextEdit(it) {
+  collab.cbTextAt = null; collab.tEditTid = it.tid;
+  textBg = it.bg || null; syncCbTextBgUI();
+  const tw = document.getElementById('cbTextWrap'); tw.hidden = false;
+  const inp = document.getElementById('cbTextInput'); inp.value = it.text || '';
+  setTimeout(() => { inp.focus(); inp.select(); }, 0);
 }
 /* redraw the teacher's shipped marks on the transparent overlay (student coords) */
 function paintOverlayMarks(extra) {
@@ -4174,6 +4355,25 @@ function paintOverlayMarks(extra) {
     if (it.type === 'stroke' && it.tool === 'eraser') drawItem(g, Object.assign({}, it, { tool: 'pencil', color: 'rgba(220,60,60,.55)' }));
     else drawItem(g, it);
   }
+  // selection box + resize handle for the select tool
+  if (collab.tSel && !collab.tMarks.includes(collab.tSel)) collab.tSel = null;
+  if (collab.tSel) {
+    const b = itemBounds(collab.tSel);
+    if (b) {
+      const sc = ov.width / s.w;
+      g.save();
+      g.setLineDash([9 / sc, 7 / sc]);
+      g.strokeStyle = '#2f7bff'; g.lineWidth = 2.2 / sc;
+      g.strokeRect(b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0);
+      g.setLineDash([]);
+      const hr = 11 / sc;
+      g.beginPath(); g.arc(b.x1, b.y1, hr, 0, Math.PI * 2);
+      g.fillStyle = '#2f7bff'; g.fill();
+      g.lineWidth = 2.6 / sc; g.strokeStyle = '#fff'; g.stroke();
+      g.restore();
+      collab.tHandle = { x: b.x1, y: b.y1, r: 18 / sc };
+    } else collab.tHandle = null;
+  } else collab.tHandle = null;
 }
 function setDrawMode(v) {
   if (v && !collab.bigSid) return;
@@ -4189,6 +4389,7 @@ function setDrawMode(v) {
     paintOverlayMarks();
   } else {
     collab.tMarks = [];
+    collab.tSel = null; collab.tHandle = null;
     clearDrawOverlay();
   }
 }
@@ -4210,8 +4411,104 @@ function setupDrawOverlay() {
   };
   const effTool = () => {
     const t = tool;
-    return (t === 'pencil' || t === 'brush' || t === 'highlighter' || t === 'eraser' ||
+    return (t === 'select' || t === 'pencil' || t === 'brush' || t === 'highlighter' || t === 'eraser' ||
       t === 'shape' || t === 'line' || t === 'arrow' || t === 'text' || t === 'sticker' || t === 'bucket') ? t : 'pencil';
+  };
+  /* ---- select tool: move / resize / re-edit the teacher's placed items ---- */
+  const GEOM_KEYS = { stroke: ['points', 'size'], shape: ['x0', 'y0', 'x1', 'y1'], text: ['x', 'y', 's'], sticker: ['x', 'y', 's'], image: ['x', 'y', 'w', 'h'] };
+  const geomSnapshot = (it) => {
+    const o = {};
+    for (const k of (GEOM_KEYS[it.type] || [])) o[k] = k === 'points' ? it.points.map((q) => ({ x: q.x, y: q.y })) : it[k];
+    return o;
+  };
+  const geomPatch = (it) => {
+    const o = {};
+    for (const k of (GEOM_KEYS[it.type] || [])) o[k] = it[k];
+    return o;
+  };
+  const moveGeom = (it, dx, dy) => {
+    if (it.type === 'stroke') { for (const q of it.points) { q.x += dx; q.y += dy; } }
+    else if (it.type === 'shape') { it.x0 += dx; it.y0 += dy; it.x1 += dx; it.y1 += dy; }
+    else { it.x += dx; it.y += dy; } // text, sticker, image
+  };
+  const resizeGeom = (sop, f) => {
+    const it = sop.it, snap = sop.snap;
+    if (it.type === 'stroke') {
+      it.points = snap.points.map((q) => ({ x: sop.ax + (q.x - sop.ax) * f, y: sop.ay + (q.y - sop.ay) * f }));
+      it.size = Math.max(1, snap.size * f);
+    } else if (it.type === 'shape') {
+      it.x1 = snap.x0 + (snap.x1 - snap.x0) * f;
+      it.y1 = snap.y0 + (snap.y1 - snap.y0) * f;
+    } else if (it.type === 'text') {
+      it.s = Math.max(4, snap.s * f);
+    } else if (it.type === 'sticker') {
+      it.s = Math.max(2, snap.s * f);
+    } else if (it.type === 'image') {
+      it.w = Math.max(4, snap.w * f); it.h = Math.max(4, snap.h * f);
+    }
+  };
+  let selOp = null, lastTapAt = 0, lastTapTid = null;
+  const selHit = (p) => {
+    if (collab.tSel && collab.tHandle) {
+      const h = collab.tHandle;
+      if (Math.hypot(p.x - h.x, p.y - h.y) < h.r) return { item: collab.tSel, handle: true };
+    }
+    for (let i = collab.tMarks.length - 1; i >= 0; i--) {
+      const it = collab.tMarks[i], b = itemBounds(it);
+      if (b && p.x >= b.x0 && p.x <= b.x1 && p.y >= b.y0 && p.y <= b.y1) return { item: it };
+    }
+    return null;
+  };
+  const selPointerDown = (e, p) => {
+    const hit = selHit(p), now = Date.now();
+    if (hit && hit.handle) {
+      const it = hit.item, b = itemBounds(it), snap = geomSnapshot(it);
+      selOp = { mode: 'resize', it, snap, moved: false, x0: b.x0, y0: b.y0, w: Math.max(1, b.x1 - b.x0), h: Math.max(1, b.y1 - b.y0) };
+      if (it.type === 'stroke') {
+        let ax = Infinity, ay = Infinity;
+        for (const q of snap.points) { ax = Math.min(ax, q.x); ay = Math.min(ay, q.y); }
+        selOp.ax = ax; selOp.ay = ay;
+      }
+      return;
+    }
+    if (hit) {
+      // a second quick tap on a textbox opens the text editor — but only if the
+      // pointer lifts without dragging (confirmed on pointerup, so a quick
+      // tap-then-drag still moves the item instead of opening the editor)
+      const dbl = hit.item.type === 'text' && hit.item.tid === lastTapTid && now - lastTapAt < 400;
+      lastTapAt = now; lastTapTid = hit.item.tid;
+      collab.tSel = hit.item;
+      selOp = { mode: 'move', it: hit.item, lx: p.x, ly: p.y, cx0: e.clientX, cy0: e.clientY, downAt: now, dbl, moved: false };
+      paintOverlayMarks(); markCbTools();
+      return;
+    }
+    lastTapAt = 0; lastTapTid = null;
+    collab.tSel = null; selOp = null;
+    paintOverlayMarks(); markCbTools();
+  };
+  const selPointerMove = (e) => {
+    if (!selOp) return;
+    const p = toStudent(e); if (!p) return;
+    const it = selOp.it;
+    if (selOp.mode === 'move') {
+      const dx = p.x - selOp.lx, dy = p.y - selOp.ly;
+      selOp.lx = p.x; selOp.ly = p.y;
+      if (dx || dy) { selOp.moved = true; moveGeom(it, dx, dy); paintOverlayMarks(); }
+    } else {
+      const f = Math.max(0.15, Math.min(6, Math.hypot(p.x - selOp.x0, p.y - selOp.y0) / Math.hypot(selOp.w, selOp.h)));
+      selOp.moved = true; resizeGeom(selOp, f); paintOverlayMarks();
+    }
+  };
+  const selPointerUp = (e) => {
+    if (!selOp) return;
+    const sop = selOp; selOp = null;
+    // double-tap confirmed only when the pointer lifts near where it went down
+    if (sop.dbl && e && Math.hypot(e.clientX - sop.cx0, e.clientY - sop.cy0) <= 8 && Date.now() - sop.downAt < 600) {
+      lastTapAt = 0; lastTapTid = null;
+      openCbTextEdit(sop.it);
+      return;
+    }
+    if (sop.moved) publishTUpdate(sop.it.tid, geomPatch(sop.it));
   };
   const stampSrc = () => {
     if (stickerMode === 'outline') { const ol = OUTLINES.find(o => o.id === outlineId); return ol ? ol.img : null; }
@@ -4241,8 +4538,10 @@ function setupDrawOverlay() {
   ov.addEventListener('pointerdown', (e) => {
     const p = toStudent(e); if (!p) return;
     e.preventDefault(); try { ov.setPointerCapture(e.pointerId); } catch {}
-    document.getElementById('cbTextWrap').hidden = true; collab.cbTextAt = null;
+    document.getElementById('cbTextWrap').hidden = true; collab.cbTextAt = null; collab.tEditTid = null;
     const t = effTool();
+    if (t === 'select') { selPointerDown(e, p); return; }
+    if (collab.tSel) { collab.tSel = null; paintOverlayMarks(); markCbTools(); }
     if (t === 'bucket') {
       const s = cur();
       try { collab.mqtt.pub(roomTopic('d/' + s.sid), { k: 't-fill', x: p.x, y: p.y, color, alpha: opacity }); } catch (err) {}
@@ -4251,6 +4550,7 @@ function setupDrawOverlay() {
     if (t === 'text') {
       collab.cbTextAt = p;
       const tw = document.getElementById('cbTextWrap'); tw.hidden = false;
+      syncCbTextBgUI();
       const inp = document.getElementById('cbTextInput'); inp.value = '';
       setTimeout(() => inp.focus(), 0);
       op = null; return;
@@ -4264,6 +4564,7 @@ function setupDrawOverlay() {
     paintOverlayMarks(liveItem());
   });
   ov.addEventListener('pointermove', (e) => {
+    if (selOp) { selPointerMove(e); return; }
     if (!op) return;
     const p = toStudent(e); if (!p) return;
     const t = effTool();
@@ -4282,8 +4583,8 @@ function setupDrawOverlay() {
     if (it.type === 'image' && (!it.w || !it.h)) return;
     shipTeacherItem(it);
   };
-  ov.addEventListener('pointerup', up);
-  ov.addEventListener('pointercancel', () => { op = null; paintOverlayMarks(); });
+  ov.addEventListener('pointerup', (e) => { if (selOp) selPointerUp(e); up(); });
+  ov.addEventListener('pointercancel', () => { op = null; selOp = null; paintOverlayMarks(); });
 }
 function teacherSendAll() {
   if (!collab.students.size) { toast('No collaborators joined yet'); return; }
@@ -4446,7 +4747,8 @@ function teacherPdf() {
 function buildStudentUI() {
   const ui = document.getElementById('collabUI');
   ui.innerHTML =
-    '<div id="sBar"><span class="sCode">' + escHtml(collab.code) + '</span><span id="sTeacher"></span>' +
+    '<div id="sBar"><button class="sFoldBtn" id="sFoldBtn" title="Collapse"><svg viewBox="0 0 24 24"><path d="M6 14l6-6 6 6" fill="none" stroke="#2b2b3a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
+    '<span class="sCode">' + escHtml(collab.code) + '</span><span id="sTeacher"></span>' +
     '<span id="sPaused" hidden>Paused</span>' +
     '<button id="sFriendsBtn">Friends (0)</button><button id="sLeaveBtn">Leave</button></div>' +
     '<div id="sFriends" hidden></div><div id="tDrawingPill" hidden></div>' +
@@ -4458,6 +4760,41 @@ function buildStudentUI() {
     '</div></div>';
   document.getElementById('sLeaveBtn').onclick = () => leaveRoom(false);
   document.getElementById('sFriendsBtn').onclick = () => { const f = document.getElementById('sFriends'); f.hidden = !f.hidden; };
+  /* fold / drag the room bar — keeps it from blocking the canvas on small screens */
+  (() => {
+    const bar = document.getElementById('sBar'), fold = document.getElementById('sFoldBtn');
+    fold.onclick = () => {
+      const c = bar.classList.toggle('collapsed');
+      fold.title = c ? 'Expand' : 'Collapse';
+    };
+    let drag = null, suppressClick = false;
+    bar.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('button')) return;
+      const r = bar.getBoundingClientRect();
+      drag = { dx: e.clientX - r.left, dy: e.clientY - r.top, moved: false };
+      bar.style.left = r.left + 'px';
+      bar.style.top = r.top + 'px';
+      bar.style.transform = 'none';
+      try { bar.setPointerCapture(e.pointerId); } catch {}
+    });
+    bar.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      if (Math.abs(e.clientX - drag.dx - parseFloat(bar.style.left)) > 6 ||
+          Math.abs(e.clientY - drag.dy - parseFloat(bar.style.top)) > 6) drag.moved = true;
+      bar.style.left = Math.max(0, Math.min(window.innerWidth - 60, e.clientX - drag.dx)) + 'px';
+      bar.style.top = Math.max(0, Math.min(window.innerHeight - 40, e.clientY - drag.dy)) + 'px';
+    });
+    const stop = () => {
+      suppressClick = !!(drag && drag.moved);
+      drag = null;
+      if (suppressClick) setTimeout(() => { suppressClick = false; }, 0);
+    };
+    bar.addEventListener('pointerup', stop);
+    bar.addEventListener('pointercancel', stop);
+    bar.addEventListener('click', (e) => {
+      if (suppressClick) { e.stopPropagation(); e.preventDefault(); }
+    }, true);
+  })();
   document.getElementById('cbFriendClose').onclick = closeFriend;
   updateTeacherLabel(); renderFriends();
 }
@@ -4620,6 +4957,22 @@ function onStudentDirect(m) {
       finally { collab.applyingRemote = false; }
       color = oc; opacity = oo;
     }
+  } else if (m.k === 't-del') {
+    // the creator deleted one of their items from this canvas
+    if (m.tid) {
+      const i = items.findIndex((x) => x && x.tid === m.tid);
+      if (i >= 0) { items.splice(i, 1); redraw(); saveState(); }
+    }
+  } else if (m.k === 't-update') {
+    // the creator moved / resized / re-typed one of their items on this canvas
+    if (m.tid && m.patch && typeof m.patch === 'object') {
+      const it = items.find((x) => x && x.tid === m.tid);
+      if (it) {
+        const OK = ['x', 'y', 'x0', 'y0', 'x1', 'y1', 'w', 'h', 's', 'size', 'text', 'bg', 'points'];
+        for (const k of OK) if (m.patch[k] !== undefined) it[k] = m.patch[k];
+        redraw(); saveState();
+      }
+    }
   } else if (m.k === 'kick') {
     teardownCollab('You were removed from the room by the creator');
   } else if (m.k === 'pause') {
@@ -4688,6 +5041,20 @@ function teardownCollab(msg) {
   const ui = document.getElementById('collabUI'); if (ui) ui.innerHTML = '';
   if (msg) toast(msg);
 }
+/* phone notice: "copaint works better on pc" — dismissible, canvas stays fully usable */
+(() => {
+  const note = document.getElementById('pcNote');
+  if (!note) return;
+  const isPhone = /Mobi|Android|iPhone|iPod/i.test(navigator.userAgent || '');
+  if (!isPhone) return;
+  try { if (localStorage.getItem('copaintPcNote') === '1') return; } catch {}
+  note.hidden = false;
+  document.getElementById('pcNoteX').onclick = () => {
+    note.hidden = true;
+    try { localStorage.setItem('copaintPcNote', '1'); } catch {}
+  };
+})();
+
 window.addEventListener('beforeunload', () => {
   if (!collab.mqtt || !collab.mode) return;
   try {
