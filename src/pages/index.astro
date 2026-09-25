@@ -329,7 +329,7 @@ const title = "coPaint";
 
     /* teacher side panel */
     #tPanel {
-      position: fixed; left: 124px; top: 12px; bottom: 12px; width: 248px; z-index: 45;
+      position: fixed; left: auto; right: 12px; top: 12px; bottom: 124px; width: 248px; z-index: 45;
       background: #fff; border-radius: 18px; box-shadow: 0 8px 30px rgba(80,60,140,.25);
       display: flex; flex-direction: column; overflow: hidden;
     }
@@ -386,7 +386,7 @@ const title = "coPaint";
     }
     .cbModal[hidden] { display: none; }
     .cbBox {
-      background: #fff; border-radius: 20px; padding: 14px; max-width: min(860px, 92vw); max-height: 88vh;
+      background: #fff; border-radius: 20px; padding: 14px; width: min(1500px, 96vw); max-height: 96vh;
       display: flex; flex-direction: column; gap: 8px; box-shadow: 0 20px 60px rgba(40,30,90,.4);
     }
     .cbBoxHead { display: flex; align-items: center; gap: 8px; }
@@ -397,10 +397,32 @@ const title = "coPaint";
     .cbClose { background: #efecf9; color: #57536e; }
     .cbDraw { background: #fff3d6; color: #8a6d1a; }
     .cbDraw.on { background: #ffd166; color: #5b430a; }
-    .cbStage { position: relative; line-height: 0; }
-    .cbStage img { max-width: min(820px, 88vw); max-height: 62vh; border-radius: 12px; border: 2px solid #e6e1f5; background: #fff; }
+    .cbStage { position: relative; line-height: 0; align-self: center; }
+    .cbStage img { max-width: 94vw; max-height: calc(96vh - 170px); border-radius: 12px; border: 2px solid #e6e1f5; background: #fff; }
     #cbDrawLayer { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; border-radius: 12px; }
     .cbNote { font-size: 12px; color: #8b86a8; }
+    /* teacher mini tool strip inside the enlarged student view */
+    .cbTools { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .cbTools button {
+      width: 36px; height: 36px; border-radius: 10px; border: 2px solid #e6e1f5; background: #fff;
+      display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 5px;
+    }
+    .cbTools button svg { width: 22px; height: 22px; display: block; }
+    .cbTools button.on { border-color: #2f7bff; background: #eef4ff; }
+    .cbTools .cbSep { width: 2px; align-self: stretch; background: #efecf9; border-radius: 2px; margin: 2px; }
+    .cbTools input[type="color"] { width: 36px; height: 36px; border: 2px solid #e6e1f5; border-radius: 10px; padding: 2px; background: #fff; cursor: pointer; }
+    .cbTools input[type="range"] { width: 90px; accent-color: #2f7bff; }
+    .cbTools .cbSizeLab { font-size: 11px; font-weight: 800; color: #8b86a8; }
+    #cbTextWrap { display: flex; gap: 6px; align-items: center; }
+    #cbTextWrap[hidden] { display: none; }
+    #cbTextInput {
+      flex: 1; border: 2px solid #e6e1f5; border-radius: 10px; padding: 8px 10px;
+      font-family: inherit; font-size: 15px; font-weight: 600; color: #2b2b3a;
+    }
+    #cbTextInput:focus { border-color: #2f7bff; outline: none; }
+    #cbTextWrap button { border: none; border-radius: 10px; padding: 8px 14px; font-weight: 800; font-size: 13px; cursor: pointer; }
+    #cbTextOk { background: #2f7bff; color: #fff; }
+    #cbTextCancel { background: #efecf9; color: #57536e; }
 
     /* student room bar */
     #sBar {
@@ -505,13 +527,9 @@ const title = "coPaint";
       background: #fff; border-radius: 14px; padding: 5px 6px;
       box-shadow: 0 6px 20px rgba(80,60,140,.22);
     }
-    #zoomInput {
-      width: 58px; text-align: center; border: 2px solid transparent; border-radius: 10px;
-      background: transparent; font-family: inherit; font-weight: 700; font-size: 15px; color: var(--ink);
-      padding: 7px 2px; margin: 0;
+    #zoomSlider {
+      width: 132px; margin: 0 4px; accent-color: var(--accent); cursor: pointer;
     }
-    #zoomInput:hover { border-color: var(--accent); }
-    #zoomInput:focus { border-color: var(--accent); outline: none; background: #fff8fb; }
     #zoomBar button {
       min-width: 38px; height: 38px; border-radius: 10px; border: 2px solid transparent;
       background: transparent; cursor: pointer; font-family: inherit;
@@ -577,7 +595,7 @@ const title = "coPaint";
   <header id="toolbar">
     <button class="act" id="toolCollapse" title="Collapse toolbar">
       <svg class="ic-collapse" viewBox="0 0 24 24"><path d="M14 6l-6 6 6 6" fill="none" stroke="#2b2b3a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <svg class="ic-paint" viewBox="0 0 24 24"><path d="M12 4a8 8 0 1 0 .1 16c1.3 0 1.7-.8 1.2-1.8-.5-1.1-.1-2.4 1.2-2.4h1.7a3.4 3.4 0 0 0 3.4-3.4C19.7 7.7 16.2 4 12 4z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linejoin="round"/><circle cx="8.6" cy="10.6" r="1.2" fill="#2b2b3a"/><circle cx="12" cy="8.2" r="1.2" fill="#2b2b3a"/><circle cx="15.2" cy="10.6" r="1.2" fill="#2b2b3a"/></svg>
+      <svg class="ic-paint" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#2b2b3a"/><path d="M20 45 L43 22" stroke="white" stroke-width="7" stroke-linecap="round"/><circle cx="47" cy="18" r="5.5" fill="white"/></svg>
     </button>
     <div class="group" data-gid="history" role="toolbar" aria-label="History">
       <button class="group-toggle" title="Collapse section">
@@ -775,7 +793,7 @@ const title = "coPaint";
       <button id="zoomOut" title="Zoom out">
         <svg viewBox="0 0 24 24"><path d="M5 12h14" stroke="#2b2b3a" stroke-width="2.6" stroke-linecap="round"/></svg>
       </button>
-      <input id="zoomInput" title="Type a zoom %, double-click to reset" value="100%" inputmode="numeric" autocomplete="off" spellcheck="false" />
+      <input type="range" id="zoomSlider" min="25" max="400" step="1" value="100" title="Zoom — double-click to reset" />
       <button id="zoomIn" title="Zoom in">
         <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="#2b2b3a" stroke-width="2.6" stroke-linecap="round"/></svg>
       </button>
@@ -2609,21 +2627,18 @@ stage.addEventListener('wheel', (e) => {
 }, { passive: false });
 
 /* zoom */
-const zoomInput = document.getElementById('zoomInput');
-function refreshZoomLabel() { zoomInput.value = Math.round(zoom * 100) + '%'; }
-function applyZoomInput() { // typed zoom %, clamped to 25–400
-  const n = parseInt(zoomInput.value.replace(/[^0-9]/g, ''), 10);
-  if (isNaN(n)) { refreshZoomLabel(); return; }
-  setZoom(Math.max(25, Math.min(400, n)) / 100);
-}
-zoomInput.addEventListener('focus', () => zoomInput.select());
-zoomInput.addEventListener('keydown', (e) => {
-  e.stopPropagation(); // keep tool shortcuts / Delete out of the zoom field
-  if (e.key === 'Enter') { applyZoomInput(); zoomInput.blur(); }
-  else if (e.key === 'Escape') { refreshZoomLabel(); zoomInput.blur(); }
+const zoomSlider = document.getElementById('zoomSlider');
+function refreshZoomLabel() { zoomSlider.value = Math.round(zoom * 100); }
+zoomSlider.addEventListener('input', () => { // drag live; save once on release
+  const nz = Math.max(0.25, Math.min(4, zoomSlider.value / 100));
+  const cx = W / 2, cy = H / 2;
+  const wx = (cx - view.x) / zoom, wy = (cy - view.y) / zoom;
+  zoom = nz;
+  view.x = cx - wx * zoom; view.y = cy - wy * zoom;
+  clampView(); redraw();
 });
-zoomInput.addEventListener('change', applyZoomInput);
-zoomInput.addEventListener('dblclick', () => setZoom(1));
+zoomSlider.addEventListener('change', () => saveState());
+zoomSlider.addEventListener('dblclick', () => setZoom(1));
 function setZoom(nz, cx, cy) {
   nz = Math.max(0.25, Math.min(4, nz));
   if (cx === undefined) cx = W / 2;
@@ -3013,6 +3028,7 @@ function setTool(t) {
   areaSel = null;
   toolBtns.forEach((b) => b.classList.toggle('active', b.dataset.tool === t));
   canvas.style.cursor = CURSORS[t] || 'crosshair';
+  if (typeof markCbTools === 'function') markCbTools(); // keep the student-view strip in sync
   redraw();
 }
 toolBtns.forEach((b) => {
@@ -3516,7 +3532,7 @@ const CODE_ABC = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 function mqttConnect(clientId, onMessage, onState) {
   const enc = new TextEncoder(), dec = new TextDecoder();
   let ws = null, brokerIdx = 0, shouldRun = true, alive = false, pktId = 1;
-  let lastRx = 0, pingTimer = null, retryTimer = null, connTimer = null;
+  let lastRx = 0, pingTimer = null, retryTimer = null, connTimer = null, gen = 0, fails = 0;
   const subs = new Set();
   const encStr = (s) => { const b = enc.encode(s); const o = new Uint8Array(2 + b.length); o[0] = b.length >> 8; o[1] = b.length & 255; o.set(b, 2); return o; };
   const encLen = (n) => { const o = []; do { let d = n % 128; n = Math.floor(n / 128); if (n > 0) d |= 0x80; o.push(d); } while (n > 0); return o; };
@@ -3527,27 +3543,37 @@ function mqttConnect(clientId, onMessage, onState) {
     out.set(head, 0); out.set(body, head.length); return out;
   };
   function setAlive(v) { if (alive !== v) { alive = v; clearTimeout(connTimer); onState(v, { attempt: brokerIdx + 1, total: MQTT_BROKERS.length }); } }
-  function scheduleRetry() {
+  function scheduleRetry(countFail) {
     if (!shouldRun) return;
+    if (countFail) fails++;
     setAlive(false);
     clearTimeout(retryTimer);
-    retryTimer = setTimeout(() => { brokerIdx = (brokerIdx + 1) % MQTT_BROKERS.length; open(); }, 2500);
+    retryTimer = setTimeout(() => {
+      // retry the same broker first — a transient blip shouldn't hop brokers;
+      // rotate only after 2 consecutive failed attempts
+      if (fails >= 2) { brokerIdx = (brokerIdx + 1) % MQTT_BROKERS.length; fails = 0; }
+      open();
+    }, 2000);
   }
   function open() {
     if (!shouldRun) return;
+    const g = ++gen; // stale sockets from an older generation are ignored
     onState(false, { attempt: brokerIdx + 1, total: MQTT_BROKERS.length });
-    try { ws = new WebSocket(MQTT_BROKERS[brokerIdx], 'mqtt'); } catch (e) { scheduleRetry(); return; }
+    try { ws = new WebSocket(MQTT_BROKERS[brokerIdx], 'mqtt'); } catch (e) { scheduleRetry(true); return; }
     ws.binaryType = 'arraybuffer';
     clearTimeout(connTimer);
     connTimer = setTimeout(() => { // broker accepted TCP but never answered — move on
-      if (!alive && ws && ws.readyState !== 3) { try { ws.close(); } catch (e) {} scheduleRetry(); }
+      if (g !== gen) return;
+      if (!alive && ws && ws.readyState !== 3) { try { ws.close(); } catch (e) {} scheduleRetry(true); }
     }, 7000);
     let rest = new Uint8Array(0);
     ws.onopen = () => {
-      const vh = new Uint8Array([0, 4, 77, 81, 84, 84, 4, 2, 0, 30]); // MQTT 3.1.1, clean session, keepalive 30s
+      if (g !== gen) return;
+      const vh = new Uint8Array([0, 4, 77, 81, 84, 84, 4, 2, 0, 20]); // MQTT 3.1.1, clean session, keepalive 20s
       ws.send(pkt(0x10, [vh, encStr(clientId)]));
     };
     ws.onmessage = (ev) => {
+      if (g !== gen) return;
       lastRx = Date.now();
       const incoming = new Uint8Array(ev.data);
       const buf = new Uint8Array(rest.length + incoming.length);
@@ -3560,8 +3586,8 @@ function mqttConnect(clientId, onMessage, onState) {
         if (j + len > buf.length) { rest = buf.slice(i); return; }
         const pl = buf.slice(j, j + len); i = j + len;
         if (cmd === 2) { // CONNACK
-          if (pl[1] === 0) { setAlive(true); subs.forEach(t => rawSub(t)); }
-          else scheduleRetry();
+          if (pl[1] === 0) { fails = 0; setAlive(true); subs.forEach(t => rawSub(t)); }
+          else scheduleRetry(true);
         } else if (cmd === 3) { // PUBLISH qos0
           const tl = (pl[0] << 8) | pl[1];
           const topic = dec.decode(pl.slice(2, 2 + tl));
@@ -3570,16 +3596,20 @@ function mqttConnect(clientId, onMessage, onState) {
         // 9 = SUBACK, 13 = PINGRESP: nothing needed
       }
     };
-    ws.onerror = () => { try { ws.close(); } catch (e) {} };
-    ws.onclose = () => { if (shouldRun) scheduleRetry(); else setAlive(false); };
+    ws.onerror = () => { if (g !== gen) return; try { ws.close(); } catch (e) {} };
+    ws.onclose = () => {
+      if (g !== gen) return;
+      if (shouldRun) scheduleRetry(alive ? false : true); // a live drop retries the same broker
+      else setAlive(false);
+    };
     clearInterval(pingTimer);
     pingTimer = setInterval(() => {
-      if (!shouldRun) return;
+      if (!shouldRun || g !== gen) return;
       if (alive && ws && ws.readyState === 1) {
         ws.send(new Uint8Array([0xC0, 0x00])); // PINGREQ
-        if (Date.now() - lastRx > 45000) { try { ws.close(); } catch (e) {} scheduleRetry(); }
+        if (Date.now() - lastRx > 30000) { try { ws.close(); } catch (e) {} scheduleRetry(false); }
       }
-    }, 20000);
+    }, 12000);
   }
   function rawSub(topic) {
     const id = pktId = (pktId % 60000) + 1;
@@ -3624,6 +3654,9 @@ const collab = {
   pdfBuf: [],
   sendAllBackup: null, sendAllItem: null,
   bigSid: null, // student currently enlarged (teacher)
+  bigTimer: null, // hi-res preview loop while the big view is open
+  tMarks: [], // teacher's shipped marks awaiting the next live preview (local echo)
+  cbTextAt: null, // anchor point for the modal's inline text editor
   drawMode: false,
   friendWatch: null, // student-side friend viewer state
   openMode: false, // open canvas: everyone draws on the creator's canvas
@@ -3923,12 +3956,26 @@ function onTeacherMsg(topic, m) {
       if (im && card.dataset.seq !== String(s.seq)) { im.src = m.img; card.dataset.seq = s.seq; }
     }
     if (collab.bigSid === m.sid) {
-      const bi = document.getElementById('cbBigImg');
-      if (bi) { bi.style.display = ''; bi.src = m.img; }
+      if (!collab.bigTimer) { // hi-res stream owns the big view while it runs
+        const bi = document.getElementById('cbBigImg');
+        if (bi) { bi.style.display = ''; bi.src = m.img; }
+      }
       const note = document.getElementById('cbBigNote');
       if (note) note.textContent = 'Live view — turn on Draw to sketch on ' + s.name + "'s canvas.";
       const db = document.getElementById('cbDrawBtn'); if (db) db.disabled = false;
+    }
+  } else if (m.k === 'preview-big') {
+    const s = collab.students.get(m.sid); if (!s || !m.img) return;
+    s.w = +m.w || 0; s.h = +m.h || 0; s.lastSeen = Date.now();
+    if (collab.bigSid === m.sid) {
+      const bi = document.getElementById('cbBigImg');
+      if (bi) { bi.style.display = ''; bi.src = m.img; }
+      // the fresh hi-res frame includes anything the teacher shipped — drop the local echo
+      collab.tMarks = [];
       clearDrawOverlay();
+      const note = document.getElementById('cbBigNote');
+      if (note) note.textContent = 'Live view — turn on Draw to sketch on ' + s.name + "'s canvas.";
+      const db = document.getElementById('cbDrawBtn'); if (db) db.disabled = false;
     }
   } else if (m.k === 'pdf') {
     if (m.img) { collab.pdfBuf.push({ sid: m.sid, name: String(m.name || 'Collaborator').slice(0, 40), img: m.img }); tLog('Received ' + escHtml(m.name || 'Collaborator') + "'s page (" + collab.pdfBuf.length + ')'); }
@@ -4000,8 +4047,11 @@ function buildTeacherUI() {
     '<div class="cbModal" id="cbBig" hidden><div class="cbBox">' +
       '<div class="cbBoxHead"><span class="cbName" id="cbBigName"></span>' +
       '<button class="cbDraw" id="cbDrawBtn">Draw on canvas</button>' +
-      '<button class="cbClose" id="cbBigClose">Close</button></div>' +
+      '<button class="cbClose" id="cbBigClose">✕ Close</button></div>' +
+      '<div class="cbTools" id="cbTools" hidden></div>' +
       '<div class="cbStage"><img id="cbBigImg" alt=""><canvas id="cbDrawLayer" hidden></canvas></div>' +
+      '<div id="cbTextWrap" hidden><input id="cbTextInput" placeholder="Type text, then Add" maxlength="140" autocomplete="off">' +
+      '<button id="cbTextOk">Add</button><button id="cbTextCancel">Cancel</button></div>' +
       '<div class="cbNote" id="cbBigNote"></div>' +
     '</div></div>';
   document.getElementById('tpCode').onclick = () => {
@@ -4019,72 +4069,221 @@ function buildTeacherUI() {
   document.getElementById('tpEnd').onclick = () => endRoom();
   document.getElementById('cbBigClose').onclick = closeBig;
   document.getElementById('cbDrawBtn').onclick = () => setDrawMode(!collab.drawMode);
-  setupDrawOverlay();
+  buildCbTools();
+  document.getElementById('cbTextOk').onclick = commitCbText;
+  document.getElementById('cbTextCancel').onclick = () => { document.getElementById('cbTextWrap').hidden = true; collab.cbTextAt = null; };
+  document.getElementById('cbTextInput').addEventListener('keydown', (e) => {
+    e.stopPropagation();
+    if (e.key === 'Enter') commitCbText();
+    else if (e.key === 'Escape') { document.getElementById('cbTextWrap').hidden = true; collab.cbTextAt = null; }
+  });
   refreshTeacherPanel();
+}
+/* mini tool strip inside the enlarged student view — the teacher's own toolbar
+   sits behind the modal, so tools are switched here; it drives the same `tool`,
+   `color`, `size` globals the main canvas uses */
+const CB_STRIP = [
+  ['pencil', 'Pencil', '<svg viewBox="0 0 24 24"><path d="M4 20l1.2-4.2L16.7 4.3a2.1 2.1 0 013 3L8.2 18.8 4 20z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linejoin="round"/><path d="M14.8 6.2l3 3" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round"/></svg>'],
+  ['brush', 'Brush', '<svg viewBox="0 0 24 24"><path d="M14 5l5 5L9 20l-5-5L14 5z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linejoin="round"/><path d="M9 20c-1.5.6-3.6-.4-4.2-2.4" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round"/></svg>'],
+  ['highlighter', 'Highlighter', '<svg viewBox="0 0 24 24"><path d="M13.5 4.5l6 6L11 19H5v-6l8.5-8.5z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linejoin="round"/><path d="M5 19l-2 2" stroke="#2b2b3a" stroke-width="2.4" stroke-linecap="round"/></svg>'],
+  ['eraser', 'Eraser', '<svg viewBox="0 0 24 24"><path d="M7.5 19.5l-4-4a1.6 1.6 0 010-2.3l8.7-8.7a1.6 1.6 0 012.3 0l4.9 4.9a1.6 1.6 0 010 2.3l-6.6 6.6-5.3 1.2z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linejoin="round"/></svg>'],
+  ['shape', 'Shape', '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#2b2b3a" stroke-width="2"/></svg>'],
+  ['text', 'Text', '<svg viewBox="0 0 24 24"><path d="M5 6V4h14v2M12 4v16M9 20h6" fill="none" stroke="#2b2b3a" stroke-width="2.2" stroke-linecap="round"/></svg>'],
+  ['sticker', 'Sticker', '<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.8 6.3.7-4.7 4.3 1.3 6.2-5.6-3.1L6.4 20l1.3-6.2L3 9.5l6.3-.7L12 3z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linejoin="round"/></svg>'],
+  ['bucket', 'Fill', '<svg viewBox="0 0 24 24"><path d="M5 12l7-7 7 7-7 7-7-7z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linejoin="round"/><path d="M17 17c.6 2-.3 3.6-2.3 4.2" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round"/></svg>'],
+];
+function buildCbTools() {
+  const wrap = document.getElementById('cbTools');
+  let h = '';
+  for (const [t, title, svg] of CB_STRIP) h += '<button data-t="' + t + '" title="' + title + '">' + svg + '</button>';
+  h += '<span class="cbSep"></span><input type="color" id="cbColor" title="Color" value="#2b2b3a">' +
+    '<span class="cbSizeLab">Size</span><input type="range" id="cbSize" min="2" max="80" step="1" value="12" title="Size">';
+  wrap.innerHTML = h;
+  wrap.querySelectorAll('button[data-t]').forEach((b) => {
+    b.onclick = () => { setTool(b.dataset.t); markCbTools(); };
+  });
+  const cc = document.getElementById('cbColor');
+  cc.value = /^#[0-9a-f]{6}$/i.test(color) ? color : '#2b2b3a';
+  cc.oninput = () => { color = cc.value; };
+  const cs = document.getElementById('cbSize');
+  cs.value = Math.max(2, Math.min(80, size));
+  cs.oninput = () => { size = +cs.value; };
+  markCbTools();
+}
+function markCbTools() {
+  const wrap = document.getElementById('cbTools'); if (!wrap) return;
+  wrap.querySelectorAll('button[data-t]').forEach((b) => b.classList.toggle('on', b.dataset.t === tool));
+}
+function commitCbText() {
+  const inp = document.getElementById('cbTextInput');
+  const t = inp.value.trim();
+  document.getElementById('cbTextWrap').hidden = true;
+  const at = collab.cbTextAt; collab.cbTextAt = null;
+  if (!t || !at) return;
+  shipTeacherItem({ type: 'text', text: t, x: at.x, y: at.y, s: size, color, alpha: opacity, font: textFont });
+  inp.value = '';
 }
 function openBig(sid) {
   const s = collab.students.get(sid); if (!s) return;
-  collab.bigSid = sid; setDrawMode(false);
+  collab.bigSid = sid; collab.tMarks = []; setDrawMode(false);
   document.getElementById('cbBigName').textContent = s.name;
   const img = document.getElementById('cbBigImg');
   if (s.img) { img.style.display = ''; img.src = s.img; } else img.style.display = 'none';
   document.getElementById('cbBigNote').textContent = s.img ? 'Live view — turn on Draw to sketch on ' + s.name + "'s canvas." : 'Waiting for ' + s.name + "'s first preview…";
   const db = document.getElementById('cbDrawBtn'); db.classList.remove('on'); db.disabled = !s.img;
   document.getElementById('cbBig').hidden = false;
+  markCbTools();
+  // ask for hi-res previews while the big view is open (card thumbs stay small)
+  const reqBig = () => { if (collab.bigSid === sid && collab.mqtt && collab.connected) { try { collab.mqtt.pub(roomTopic('d/' + sid), { k: 'preview-big-req' }); } catch (e) {} } };
+  reqBig();
+  clearInterval(collab.bigTimer);
+  collab.bigTimer = setInterval(reqBig, 3000);
 }
 function closeBig() {
   const m = document.getElementById('cbBig'); if (m) m.hidden = true;
-  collab.bigSid = null; setDrawMode(false);
+  clearInterval(collab.bigTimer); collab.bigTimer = null;
+  collab.bigSid = null; collab.tMarks = []; collab.cbTextAt = null;
+  const tw = document.getElementById('cbTextWrap'); if (tw) tw.hidden = true;
+  setDrawMode(false);
+}
+/* ship one finished item to the viewed student's canvas */
+function shipTeacherItem(item) {
+  const s = collab.students.get(collab.bigSid);
+  if (!s || !collab.mqtt) return;
+  try { collab.mqtt.pub(roomTopic('d/' + s.sid), { k: 't-draw', item }); } catch (e) {}
+  collab.tMarks.push(item); // instant local echo until the next live preview arrives
+  paintOverlayMarks();
+  const pill = document.getElementById('tDrawingPill');
+  if (pill) { pill.textContent = 'Drawing on ' + s.name + "'s canvas…"; pill.hidden = false; clearTimeout(pill._t); pill._t = setTimeout(() => { pill.hidden = true; }, 2500); }
+}
+/* redraw the teacher's shipped marks on the transparent overlay (student coords) */
+function paintOverlayMarks(extra) {
+  const ov = document.getElementById('cbDrawLayer'); if (!ov || ov.hidden) return;
+  const s = collab.students.get(collab.bigSid); if (!s || !s.w || !s.h) return;
+  const r = ov.getBoundingClientRect();
+  if (r.width < 2 || r.height < 2) return;
+  const g = ov.getContext('2d');
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.clearRect(0, 0, ov.width, ov.height);
+  g.setTransform(ov.width / s.w, 0, 0, ov.height / s.h, 0, 0);
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  const list = extra ? collab.tMarks.concat([extra]) : collab.tMarks;
+  for (const it of list) {
+    if (!it) continue;
+    // eraser preview: destination-out would show nothing on a transparent layer
+    if (it.type === 'stroke' && it.tool === 'eraser') drawItem(g, Object.assign({}, it, { tool: 'pencil', color: 'rgba(220,60,60,.55)' }));
+    else drawItem(g, it);
+  }
 }
 function setDrawMode(v) {
+  if (v && !collab.bigSid) return;
   collab.drawMode = v;
   const ov = document.getElementById('cbDrawLayer'); if (!ov) return;
   const btn = document.getElementById('cbDrawBtn'); if (btn) btn.classList.toggle('on', v);
+  const tools = document.getElementById('cbTools'); if (tools) tools.hidden = !v;
   ov.hidden = !v;
-  if (v) { const r = ov.getBoundingClientRect(); ov.width = Math.max(1, Math.round(r.width)); ov.height = Math.max(1, Math.round(r.height)); }
-  else clearDrawOverlay();
+  if (v) {
+    const r = ov.getBoundingClientRect(); ov.width = Math.max(1, Math.round(r.width)); ov.height = Math.max(1, Math.round(r.height));
+    if (!ov.dataset.wired) { ov.dataset.wired = '1'; setupDrawOverlay(); }
+    markCbTools();
+    paintOverlayMarks();
+  } else {
+    collab.tMarks = [];
+    clearDrawOverlay();
+  }
 }
 function clearDrawOverlay() {
   const ov = document.getElementById('cbDrawLayer');
   if (ov && !ov.hidden) ov.getContext('2d').clearRect(0, 0, ov.width, ov.height);
 }
+/* Teacher draws on the viewed student's canvas with the full toolbox.
+   Items are built in the student's coordinate space and shipped as plain
+   JSON items ({k:'t-draw'}); the student commits them like local items. */
 function setupDrawOverlay() {
   const ov = document.getElementById('cbDrawLayer');
-  let pts = null;
+  let op = null; // in-progress operation
+  const cur = () => collab.students.get(collab.bigSid);
   const toStudent = (e) => {
-    const s = collab.students.get(collab.bigSid); if (!s || !s.w || !s.h) return null;
+    const s = cur(); if (!s || !s.w || !s.h) return null;
     const r = ov.getBoundingClientRect();
     return { x: (e.clientX - r.left) / r.width * s.w, y: (e.clientY - r.top) / r.height * s.h };
+  };
+  const effTool = () => {
+    const t = tool;
+    return (t === 'pencil' || t === 'brush' || t === 'highlighter' || t === 'eraser' ||
+      t === 'shape' || t === 'line' || t === 'arrow' || t === 'text' || t === 'sticker' || t === 'bucket') ? t : 'pencil';
+  };
+  const stampSrc = () => {
+    if (stickerMode === 'outline') { const ol = OUTLINES.find(o => o.id === outlineId); return ol ? ol.img : null; }
+    if (stickerMode === 'emoji') return emojiDataURL(emojiChar);
+    return null;
+  };
+  const liveItem = () => {
+    if (!op) return null;
+    const t = effTool();
+    if (t === 'pencil' || t === 'brush' || t === 'highlighter' || t === 'eraser') {
+      return { type: 'stroke', tool: t, brush: brushType, color, size, dash, alpha: opacity, points: op.pts };
+    }
+    if (t === 'shape' || t === 'line' || t === 'arrow') {
+      const kind = t === 'shape' ? shapeKind : t;
+      return {
+        type: 'shape', kind, x0: op.x0, y0: op.y0, x1: op.x1, y1: op.y1,
+        color, size, dash, fill: fillShapes, fillColor, fillStyle, alpha: opacity,
+      };
+    }
+    if (t === 'sticker') {
+      const src = stampSrc();
+      if (src) return { type: 'image', src, x: Math.min(op.x0, op.x1), y: Math.min(op.y0, op.y1), w: Math.abs(op.x1 - op.x0), h: Math.abs(op.y1 - op.y0), alpha: 1 };
+      return { type: 'sticker', id: stickerId, x: op.x0, y: op.y0, s: size, alpha: opacity };
+    }
+    return null;
   };
   ov.addEventListener('pointerdown', (e) => {
     const p = toStudent(e); if (!p) return;
     e.preventDefault(); try { ov.setPointerCapture(e.pointerId); } catch {}
-    pts = [p];
-    const s = collab.students.get(collab.bigSid);
-    const g = ov.getContext('2d');
-    g.strokeStyle = color; g.lineCap = 'round'; g.lineJoin = 'round';
-    g.lineWidth = Math.max(1.5, size * (ov.width / s.w));
-    g.globalAlpha = opacity;
-    g.beginPath(); g.moveTo(p.x / s.w * ov.width, p.y / s.h * ov.height);
+    document.getElementById('cbTextWrap').hidden = true; collab.cbTextAt = null;
+    const t = effTool();
+    if (t === 'bucket') {
+      const s = cur();
+      try { collab.mqtt.pub(roomTopic('d/' + s.sid), { k: 't-fill', x: p.x, y: p.y, color, alpha: opacity }); } catch (err) {}
+      op = null; return;
+    }
+    if (t === 'text') {
+      collab.cbTextAt = p;
+      const tw = document.getElementById('cbTextWrap'); tw.hidden = false;
+      const inp = document.getElementById('cbTextInput'); inp.value = '';
+      setTimeout(() => inp.focus(), 0);
+      op = null; return;
+    }
+    if (t === 'sticker' && !stampSrc()) {
+      // vector sticker: single tap stamps it at the current size
+      shipTeacherItem({ type: 'sticker', id: stickerId, x: p.x, y: p.y, s: size, alpha: opacity });
+      op = null; return;
+    }
+    op = { pts: [p], x0: p.x, y0: p.y, x1: p.x, y1: p.y };
+    paintOverlayMarks(liveItem());
   });
   ov.addEventListener('pointermove', (e) => {
-    if (!pts) return;
+    if (!op) return;
     const p = toStudent(e); if (!p) return;
-    pts.push(p);
-    const s = collab.students.get(collab.bigSid);
-    const g = ov.getContext('2d');
-    g.lineTo(p.x / s.w * ov.width, p.y / s.h * ov.height); g.stroke();
+    const t = effTool();
+    if (t === 'pencil' || t === 'brush' || t === 'highlighter' || t === 'eraser') op.pts.push(p);
+    else { op.x1 = p.x; op.y1 = p.y; }
+    paintOverlayMarks(liveItem());
   });
   const up = () => {
-    if (!pts || pts.length < 1) { pts = null; return; }
-    collab.mqtt.pub(roomTopic('d/' + collab.bigSid), {
-      k: 'op', by: collab.teacherName,
-      stroke: { color, size, dash, alpha: opacity, points: pts },
-    });
-    pts = null;
+    if (!op) return;
+    const t = effTool(), it = liveItem();
+    op = null;
+    paintOverlayMarks();
+    if (!it) return;
+    if (it.type === 'stroke' && it.points.length < 1) return;
+    if ((it.type === 'shape' || it.type === 'image') && Math.abs(it.x1 - it.x0) < 4 && Math.abs(it.y1 - it.y0) < 4) return;
+    if (it.type === 'image' && (!it.w || !it.h)) return;
+    shipTeacherItem(it);
   };
   ov.addEventListener('pointerup', up);
-  ov.addEventListener('pointercancel', () => { pts = null; });
+  ov.addEventListener('pointercancel', () => { op = null; paintOverlayMarks(); });
 }
 function teacherSendAll() {
   if (!collab.students.size) { toast('No collaborators joined yet'); return; }
@@ -4392,6 +4591,35 @@ function onStudentDirect(m) {
     }
   } else if (m.k === 'preview-req') {
     if (!document.hidden && collab.connected) collab.mqtt.pub(roomTopic('d/' + m.from), { k: 'preview1', from: collab.sid, img: renderPreviewURL() });
+  } else if (m.k === 'preview-big-req') {
+    // teacher has this student enlarged — send a hi-res live preview
+    if (!document.hidden && collab.connected) {
+      try { collab.mqtt.pub(roomTopic('s'), { k: 'preview-big', sid: collab.sid, img: renderFullURL(900, 0.72), w: Math.round(W), h: Math.round(H) }); } catch (e) {}
+    }
+  } else if (m.k === 't-draw') {
+    // the creator drew on this canvas with any tool — commit the item as-is
+    const it = m.item;
+    if (it && typeof it === 'object' && (it.type === 'stroke' || it.type === 'shape' || it.type === 'text' || it.type === 'sticker' || it.type === 'image')) {
+      collab.applyingRemote = true;
+      try { commit(it); } finally { collab.applyingRemote = false; }
+      const pill = document.getElementById('tDrawingPill');
+      if (pill) {
+        pill.textContent = 'The creator drew on your canvas';
+        pill.hidden = false;
+        clearTimeout(pill._t); pill._t = setTimeout(() => { pill.hidden = true; }, 3000);
+      }
+    }
+  } else if (m.k === 't-fill') {
+    // creator's bucket tool: flood fill at their tapped point with their color
+    if (typeof m.x === 'number' && typeof m.y === 'number') {
+      const oc = color, oo = opacity;
+      color = typeof m.color === 'string' ? m.color : oc;
+      opacity = typeof m.alpha === 'number' ? m.alpha : oo;
+      collab.applyingRemote = true;
+      try { bucketFill({ x: +m.x, y: +m.y }); } catch (e) {}
+      finally { collab.applyingRemote = false; }
+      color = oc; opacity = oo;
+    }
   } else if (m.k === 'kick') {
     teardownCollab('You were removed from the room by the creator');
   } else if (m.k === 'pause') {
