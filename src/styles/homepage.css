@@ -62,4 +62,6 @@ kbd {
   .hpLinks { order: 3; width: 100%; margin-left: 0; flex-wrap: nowrap; overflow-x: auto; gap: 12px; padding-bottom: 4px; }
   .hpLinks a { white-space: nowrap; }
   .hpNav .hpStart { margin-left: auto; font-size: 14px; padding: 8px 18px; }
+  .hpKeys tr td:first-child { white-space: normal; width: 55%; }
+  .hpKeys td { font-size: 14px; padding: 6px 6px; }
 }

@@ -3,7 +3,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 const title = "coPaint";
 ---
 <SiteLayout title={title}>
-  <style>
+  <style is:global>
     :root {
       --accent: #ff6b9d;
       --accent-soft: #ffe3ee;
@@ -531,30 +531,33 @@ const title = "coPaint";
     }
     /* tablets + phones: toolbar becomes a bottom bar with big touch targets */
     @media (max-width: 760px) {
+      /* phone: slim vertical rail pinned to the left edge, sections folded by default */
       #toolbar {
-        left: 8px; right: 8px; top: auto; bottom: 8px;
-        width: auto; max-height: 30vh;
-        flex-direction: row; align-items: center;
-        overflow-x: auto; overflow-y: hidden;
-        padding: 8px; gap: 8px; border-radius: 18px;
+        left: 8px; right: auto; top: 8px; bottom: auto;
+        width: 108px; max-height: calc(100% - 16px);
+        flex-direction: column; align-items: stretch;
+        overflow-x: hidden; overflow-y: auto;
+        padding: 8px 6px; gap: 2px; border-radius: 16px;
       }
       #toolbar .group {
-        display: flex; flex-direction: row; align-items: center; flex: 0 0 auto;
-        padding: 6px; gap: 6px; max-width: 72vw; overflow-x: auto;
+        display: grid; grid-template-columns: 1fr 1fr; place-items: center;
+        gap: 5px; padding: 6px 2px; max-width: none; overflow: visible;
       }
-      #toolbar .group-label { display: none; }
-      #toolCollapse { flex: 0 0 auto; margin: 0; }
-      #toolbar.collapsed { left: 8px; right: auto; top: auto; bottom: 8px; max-height: none; }
-      button.tool, button.act { width: 44px; height: 44px; flex: 0 0 auto; }
-      button.tool svg, button.act svg { width: 24px; height: 24px; }
-      #sizeRow #sizePlus, #sizeRow #sizeMinus { width: 44px; height: 44px; }
-      #colorDot { width: 44px; height: 44px; flex: 0 0 auto; }
+      #toolbar .group .group-toggle { padding: 4px 2px; }
+      #toolbar .group-label { display: block; font-size: 8px; }
+      #toolCollapse { width: 40px; align-self: center; margin: 0; flex: 0 0 auto; }
+      #toolbar.collapsed { left: 8px; right: auto; top: 8px; bottom: auto; width: auto; padding: 6px; }
+      button.tool, button.act { width: 38px; height: 38px; flex: 0 0 auto; }
+      button.tool svg, button.act svg { width: 22px; height: 22px; }
+      #sizeRow #sizePlus, #sizeRow #sizeMinus { width: 38px; height: 38px; }
+      #sizeRow #size { height: 80px; }
+      #colorDot { width: 38px; height: 38px; flex: 0 0 auto; }
       #nameInput { width: 104px; font-size: 13px; padding: 7px 8px; }
       #saveImgBtn { right: 128px; width: 40px; height: 40px; }
       #paperBtn { right: 176px; width: 40px; height: 40px; }
-      #a4Btn { bottom: 92px; right: 8px; width: 40px; height: 40px; }
-      #infoBtn { bottom: 140px; right: 8px; width: 40px; height: 40px; }
-      #zoomBar { bottom: 92px; }
+      #a4Btn { bottom: 12px; right: 8px; width: 40px; height: 40px; }
+      #infoBtn { bottom: 60px; right: 8px; width: 40px; height: 40px; }
+      #zoomBar { bottom: 12px; }
       #tPanel { left: 8px; right: 8px; top: 8px; bottom: auto; width: auto; max-height: 52vh; }
       #sBar { max-width: 96vw; flex-wrap: wrap; justify-content: center; font-size: 12px; border-radius: 18px; }
       #sFriends { top: auto; bottom: 120px; }
@@ -2985,9 +2988,9 @@ function togglePop(pop, btn) {
     if (btn) { // anchor the popover next to its button
       const r = btn.getBoundingClientRect();
       const w = pop.offsetWidth, h = pop.offsetHeight;
-      if (window.innerWidth <= 760) { // bottom toolbar: open above the button
-        pop.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, Math.round(r.left + r.width / 2 - w / 2))) + 'px';
-        pop.style.top = Math.max(8, Math.round(r.top - h - 8)) + 'px';
+      if (window.innerWidth <= 760 && btn.id !== 'paperBtn') { // phone left rail: open right of the button
+        pop.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, Math.round(r.right + 8))) + 'px';
+        pop.style.top = Math.max(8, Math.min(window.innerHeight - h - 8, Math.round(r.top - 4))) + 'px';
       } else if (btn.id === 'paperBtn') { // top-right button: open below-left so it stays on screen
         pop.style.left = Math.max(8, Math.round(r.left - w - 8)) + 'px';
         pop.style.top = Math.max(8, Math.min(window.innerHeight - h - 8, Math.round(r.bottom + 8))) + 'px';
@@ -3475,7 +3478,7 @@ if (saved && saved.toolbarCollapsed) {
   toolbar.classList.add('collapsed');
   collapseBtn.title = 'Expand toolbar';
 }
-if (saved && saved.toolbarPos) {
+if (saved && saved.toolbarPos && window.innerWidth > 760) {
   toolbarPos = saved.toolbarPos;
   toolbar.style.left = toolbarPos.x + 'px';
   toolbar.style.top = toolbarPos.y + 'px';
@@ -3488,7 +3491,14 @@ if (saved && Array.isArray(saved.foldedGroups)) saved.foldedGroups.forEach(id =>
     const t = g.querySelector('.group-toggle');
     if (t) t.title = 'Expand section';
   }
-});
+}); else if (window.matchMedia('(max-width: 760px)').matches) {
+  // phones: start with every section folded for a slim left rail (user's choice persists after)
+  document.querySelectorAll('#toolbar .group').forEach(g => {
+    g.classList.add('folded');
+    const t = g.querySelector('.group-toggle');
+    if (t) t.title = 'Expand section';
+  });
+}
 setTool('pencil');
 refreshZoomLabel();
 resize();
@@ -3499,14 +3509,14 @@ redraw();
    Zero-setup realtime via a public MQTT broker over WebSocket.
    Same file is teacher (create room) or student (join with code).
    ===================================================================== */
-const MQTT_BROKERS = ['wss://broker.emqx.io:8084/mqtt', 'wss://test.mosquitto.org:8081/mqtt'];
+const MQTT_BROKERS = ['wss://broker.emqx.io:8084/mqtt', 'wss://broker.hivemq.com:8884/mqtt', 'wss://test.mosquitto.org:8081/mqtt'];
 const ROOM_NS = 'kp1/room/';
 const CODE_ABC = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 
 function mqttConnect(clientId, onMessage, onState) {
   const enc = new TextEncoder(), dec = new TextDecoder();
   let ws = null, brokerIdx = 0, shouldRun = true, alive = false, pktId = 1;
-  let lastRx = 0, pingTimer = null, retryTimer = null;
+  let lastRx = 0, pingTimer = null, retryTimer = null, connTimer = null;
   const subs = new Set();
   const encStr = (s) => { const b = enc.encode(s); const o = new Uint8Array(2 + b.length); o[0] = b.length >> 8; o[1] = b.length & 255; o.set(b, 2); return o; };
   const encLen = (n) => { const o = []; do { let d = n % 128; n = Math.floor(n / 128); if (n > 0) d |= 0x80; o.push(d); } while (n > 0); return o; };
@@ -3516,7 +3526,7 @@ function mqttConnect(clientId, onMessage, onState) {
     const out = new Uint8Array(head.length + body.length);
     out.set(head, 0); out.set(body, head.length); return out;
   };
-  function setAlive(v) { if (alive !== v) { alive = v; onState(v); } }
+  function setAlive(v) { if (alive !== v) { alive = v; clearTimeout(connTimer); onState(v, { attempt: brokerIdx + 1, total: MQTT_BROKERS.length }); } }
   function scheduleRetry() {
     if (!shouldRun) return;
     setAlive(false);
@@ -3525,8 +3535,13 @@ function mqttConnect(clientId, onMessage, onState) {
   }
   function open() {
     if (!shouldRun) return;
-    try { ws = new WebSocket(MQTT_BROKERS[brokerIdx]); } catch (e) { scheduleRetry(); return; }
+    onState(false, { attempt: brokerIdx + 1, total: MQTT_BROKERS.length });
+    try { ws = new WebSocket(MQTT_BROKERS[brokerIdx], 'mqtt'); } catch (e) { scheduleRetry(); return; }
     ws.binaryType = 'arraybuffer';
+    clearTimeout(connTimer);
+    connTimer = setTimeout(() => { // broker accepted TCP but never answered — move on
+      if (!alive && ws && ws.readyState !== 3) { try { ws.close(); } catch (e) {} scheduleRetry(); }
+    }, 7000);
     let rest = new Uint8Array(0);
     ws.onopen = () => {
       const vh = new Uint8Array([0, 4, 77, 81, 84, 84, 4, 2, 0, 30]); // MQTT 3.1.1, clean session, keepalive 30s
@@ -3578,7 +3593,7 @@ function mqttConnect(clientId, onMessage, onState) {
       try { ws.send(pkt(0x30, [encStr(topic), enc.encode(JSON.stringify(obj))])); return true; }
       catch (e) { return false; }
     },
-    close() { shouldRun = false; clearInterval(pingTimer); clearTimeout(retryTimer); try { ws && ws.close(); } catch (e) {} setAlive(false); },
+    close() { shouldRun = false; clearInterval(pingTimer); clearTimeout(retryTimer); clearTimeout(connTimer); try { ws && ws.close(); } catch (e) {} setAlive(false); },
   };
 }
 
@@ -4077,6 +4092,14 @@ function teacherSendAll() {
   collab.mqtt.pub(roomTopic('t'), { k: 'send-all', img: url, w: Math.round(W), h: Math.round(H), by: collab.teacherName });
   tLog('Sent your canvas to all collaborators'); toast('Canvas sent to all collaborators');
 }
+function collabConnProgress(info) {
+  // show "Connecting… (1/3)" in the visible create/join popup while brokers are tried
+  if (!info || info.attempt == null) return;
+  const errEl = document.querySelector('#collabPop:not([hidden]) .cpErr');
+  if (errEl && /^(Starting room|Joining|Connecting)/.test(errEl.textContent)) {
+    errEl.textContent = 'Connecting… (' + info.attempt + '/' + info.total + ')';
+  }
+}
 function createRoom(pass, cb) {
   if (collab.mode) { cb(false, 'Already in a room.'); return; }
   let done = false;
@@ -4090,8 +4113,10 @@ function createRoom(pass, cb) {
       if (/\/all$/.test(topic)) onAllMsg(m);
       else if (/\/s$/.test(topic)) onTeacherMsg(topic, m);
     },
-    (up) => {
+    (up, info) => {
       collab.connected = up;
+      if (!up && info) collabConnProgress(info);
+      if (up && !collab._connAt) collab._connAt = Date.now();
       if (up && collab.mode === 'teacher') {
         collab.mqtt.sub(roomTopic('s'));
         collab.mqtt.sub(roomTopic('all'));
@@ -4107,7 +4132,7 @@ function createRoom(pass, cb) {
         toast('Connection lost — retrying…');
       }
     });
-  later(() => { if (collab.mode === 'teacher' && !collab.connected) { teardownCollab(); finish(false, 'Could not reach the network — check internet and retry.'); } }, 15000);
+  later(() => { if (collab.mode === 'teacher' && !collab.connected) { teardownCollab(); finish(false, 'Could not reach the network — check internet and retry.'); } }, 30000);
 }
 function endRoom() {
   try { if (collab.mqtt) collab.mqtt.pub(roomTopic('t'), { k: 'end' }); } catch (e) {}
@@ -4380,7 +4405,7 @@ function joinRoom(code, pass, cb) {
   let done = false;
   const finish = (ok, msg) => { if (!done) { done = true; cb(ok, msg); } };
   collab.joinCb = finish;
-  Object.assign(collab, { mode: 'student', code, pass: pass || '', sid: getSid(), name: myName(), teacherLast: 0, teacherName: '', friends: [], connected: false, paused: false });
+  Object.assign(collab, { mode: 'student', code, pass: pass || '', sid: getSid(), name: myName(), teacherLast: 0, teacherName: '', friends: [], connected: false, paused: false, _connAt: 0 });
   const cid = 'kp-s-' + code + '-' + collab.sid;
   collab.mqtt = mqttConnect(cid,
     (topic, m) => {
@@ -4389,8 +4414,10 @@ function joinRoom(code, pass, cb) {
       else if (/\/all$/.test(topic)) onAllMsg(m);
       else if (topic.endsWith('/d/' + collab.sid)) onStudentDirect(m);
     },
-    (up) => {
+    (up, info) => {
       collab.connected = up;
+      if (!up && info) collabConnProgress(info);
+      if (up && !collab._connAt) collab._connAt = Date.now();
       if (up && collab.mode === 'student') {
         collab.mqtt.sub(roomTopic('t'));
         collab.mqtt.sub(roomTopic('d/' + collab.sid));
@@ -4408,9 +4435,15 @@ function joinRoom(code, pass, cb) {
     if (collab.mode !== 'student') return;
     if (collab.teacherLast && Date.now() - collab.teacherLast > 30000) teardownCollab('Room ended — back to your own canvas');
   }, 3000);
-  later(() => {
-    if (collab.mode === 'student' && !document.getElementById('sBar')) { teardownCollab(); finish(false, 'Room not found — check the code.'); }
-  }, 8000);
+  const joinT0 = Date.now();
+  every(() => {
+    if (collab.mode !== 'student' || document.getElementById('sBar')) return;
+    if (collab.connected && collab._connAt && Date.now() - collab._connAt > 12000) {
+      teardownCollab(); finish(false, 'Room not found — check the code.');
+    } else if (!collab.connected && Date.now() - joinT0 > 30000) {
+      teardownCollab(); finish(false, 'Could not reach the network — check internet and retry.');
+    }
+  }, 1000);
 }
 function leaveRoom(silent) {
   try { if (collab.mqtt) collab.mqtt.pub(roomTopic('s'), { k: 'leave', sid: collab.sid }); } catch (e) {}
@@ -4421,7 +4454,7 @@ function teardownCollab(msg) {
   collab.timers = [];
   try { collab.mqtt && collab.mqtt.close(); } catch (e) {}
   if (collab.myBackup) { items = collab.myBackup; selected = null; redraw(); saveState(); }
-  Object.assign(collab, { mqtt: null, mode: null, connected: false, _tBeat: false, joinCb: null, bigSid: null, drawMode: false, friendWatch: null, sendAllItem: null, sendAllBackup: null, pdfBuf: [], friends: [], teacherLast: 0, teacherName: '', openMode: false, myBackup: null, opSeq: 0, applyingRemote: false, paused: false });
+  Object.assign(collab, { mqtt: null, mode: null, connected: false, _tBeat: false, _connAt: 0, joinCb: null, bigSid: null, drawMode: false, friendWatch: null, sendAllItem: null, sendAllBackup: null, pdfBuf: [], friends: [], teacherLast: 0, teacherName: '', openMode: false, myBackup: null, opSeq: 0, applyingRemote: false, paused: false });
   collab.students = new Map();
   clearRemoteCursors();
   const ui = document.getElementById('collabUI'); if (ui) ui.innerHTML = '';
