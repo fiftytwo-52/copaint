@@ -5,13 +5,15 @@ interface Props {
   description?: string;
   keywords?: string;
   canonical?: string;
+  noindex?: boolean;
 }
 
 const {
   title = "coPaint — Free Online Paint & Collaborative Whiteboard",
   description = "Free online paint tool and digital whiteboard. Draw together with MS Paint-like tools, brush styles, shapes, stickers, and realtime classroom collaboration with no login required.",
   keywords = "paint, ms paint, ms paint online, online paint, free online paint, whiteboard, whiteboard online, online whiteboard, digital whiteboard, virtual whiteboard, free whiteboard, collaborative paint, draw together online whiteboard",
-  canonical = "https://copaint-qxc.pages.dev/"
+  canonical = "https://copaint-qxc.pages.dev/",
+  noindex = false
 } = Astro.props;
 
 const siteUrl = "https://copaint-qxc.pages.dev";
@@ -29,8 +31,13 @@ const fullCanonical = canonical.startsWith("http") ? canonical : `${siteUrl}${ca
   <meta name="description" content={description} />
   <meta name="keywords" content={keywords} />
   <meta name="author" content="coPaint" />
-  <meta name="robots" content="index, follow" />
+  <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
   <link rel="canonical" href={fullCanonical} />
+
+  <!-- Google Fonts: Baloo 2 (Headings & Brand) + Plus Jakarta Sans (Readable UI & Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />

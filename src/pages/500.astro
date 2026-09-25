@@ -1,0 +1,128 @@
+---
+/* 500 Server Error fallback page for coPaint */
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Nav from '../components/homepage/Nav.astro';
+import Footer from '../components/homepage/Footer.astro';
+import '../styles/homepage.css';
+---
+<SiteLayout
+  title="Server Error (500) — coPaint"
+  description="Something went wrong while loading coPaint. Refresh the page or return to the drawing whiteboard."
+  canonical="/500"
+  noindex={true}
+>
+  <div id="homePage">
+    <div class="hpInner">
+      <Nav />
+
+      <main class="errorHero" id="mainContent">
+        <div class="errorBadge">500 Server Error</div>
+        <div class="errorCanvasIllust" aria-hidden="true">
+          <svg viewBox="0 0 160 120" width="160" height="120">
+            <!-- Paint Bucket tilted -->
+            <rect x="35" y="30" width="90" height="70" rx="12" fill="#ffffff" stroke="#2b2b3a" stroke-width="4" />
+            <path d="M45 30 C45 10 115 10 115 30" fill="none" stroke="#2b2b3a" stroke-width="4" stroke-linecap="round" />
+            <!-- Spilled brush -->
+            <line x1="30" y1="80" x2="130" y2="80" stroke="#ff595e" stroke-width="12" stroke-linecap="round" />
+            <!-- Confused face -->
+            <circle cx="65" cy="54" r="5" fill="#2b2b3a" />
+            <circle cx="95" cy="54" r="5" fill="#2b2b3a" />
+            <path d="M72 68 Q80 74 88 68" fill="none" stroke="#2b2b3a" stroke-width="3.5" stroke-linecap="round" />
+            <!-- Droplets -->
+            <circle cx="50" cy="98" r="4" fill="#ff595e" />
+            <circle cx="80" cy="104" r="5" fill="#ff595e" />
+            <circle cx="110" cy="96" r="4" fill="#ff595e" />
+          </svg>
+        </div>
+
+        <h1 class="errorTitle">Whoops! A paint spill happened</h1>
+        <p class="errorDesc">
+          Something unexpected went wrong on our end. Don't worry — your offline drawings and saved rooms are safe in your browser.
+        </p>
+
+        <div class="errorActions">
+          <button class="hpStart hpBig" type="button" onclick="window.location.reload()">Try Reloading</button>
+          <a class="errorSecondaryBtn" href="/">Start Fresh Drawing</a>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  </div>
+
+  <style>
+    .errorHero {
+      text-align: center;
+      padding: 40px 14px 60px;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .errorBadge {
+      display: inline-block;
+      font-family: var(--font-brand);
+      font-size: 15px;
+      font-weight: 800;
+      color: #b83236;
+      background: #ffe3e4;
+      padding: 6px 16px;
+      border-radius: 999px;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .errorCanvasIllust {
+      margin: 10px auto 24px;
+      display: flex;
+      justify-content: center;
+      filter: drop-shadow(0 10px 18px rgba(184, 50, 54, 0.12));
+    }
+    .errorTitle {
+      font-family: var(--font-brand);
+      font-size: clamp(32px, 6vw, 46px);
+      font-weight: 800;
+      color: #2b2b3a;
+      line-height: 1.15;
+      margin: 0 0 14px;
+      letter-spacing: -0.01em;
+    }
+    .errorDesc {
+      font-family: var(--font-body);
+      font-size: 17px;
+      line-height: 1.65;
+      color: #57536e;
+      margin: 0 auto 32px;
+      max-width: 520px;
+    }
+    .errorActions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .errorSecondaryBtn {
+      display: inline-block;
+      font-family: var(--font-brand);
+      font-weight: 700;
+      font-size: 18px;
+      padding: 15px 32px;
+      border-radius: 999px;
+      background: #ffffff;
+      color: #2b2b3a;
+      border: 2px solid #ded8f0;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(80, 60, 140, 0.08);
+      transition: transform 0.12s ease, background 0.15s ease, border-color 0.15s ease;
+      cursor: pointer;
+    }
+    .errorSecondaryBtn:hover {
+      background: #f7f5ff;
+      border-color: #b5a9e3;
+      transform: translateY(-1px);
+    }
+    .errorSecondaryBtn:focus-visible {
+      outline: 3px solid #2f7bff;
+      outline-offset: 3px;
+    }
+  </style>
+</SiteLayout>

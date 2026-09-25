@@ -1,0 +1,129 @@
+---
+/* 404 Not Found error page for coPaint */
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Nav from '../components/homepage/Nav.astro';
+import Footer from '../components/homepage/Footer.astro';
+import '../styles/homepage.css';
+---
+<SiteLayout
+  title="Page Not Found (404) — coPaint"
+  description="Sorry, the page you're looking for doesn't exist on coPaint. Jump straight into the free online paint whiteboard or visit the homepage."
+  canonical="/404"
+  noindex={true}
+>
+  <div id="homePage">
+    <div class="hpInner">
+      <Nav />
+
+      <main class="errorHero" id="mainContent">
+        <div class="errorBadge">404 Error</div>
+        <div class="errorCanvasIllust" aria-hidden="true">
+          <svg viewBox="0 0 160 120" width="160" height="120">
+            <!-- Easel / Canvas Board -->
+            <rect x="25" y="15" width="110" height="80" rx="10" fill="#ffffff" stroke="#2b2b3a" stroke-width="4" />
+            <!-- Easel legs -->
+            <line x1="40" y1="95" x2="25" y2="116" stroke="#2b2b3a" stroke-width="4" stroke-linecap="round" />
+            <line x1="120" y1="95" x2="135" y2="116" stroke="#2b2b3a" stroke-width="4" stroke-linecap="round" />
+            <line x1="80" y1="95" x2="80" y2="118" stroke="#2b2b3a" stroke-width="4" stroke-linecap="round" />
+            <!-- Playful paint splatter face -->
+            <circle cx="60" cy="50" r="5" fill="#2b2b3a" />
+            <circle cx="100" cy="50" r="5" fill="#2b2b3a" />
+            <path d="M68 66 Q80 58 92 66" fill="none" stroke="#2b2b3a" stroke-width="4" stroke-linecap="round" />
+            <!-- Colorful paint spots -->
+            <circle cx="45" cy="32" r="7" fill="#ff595e" />
+            <circle cx="115" cy="36" r="6" fill="#ffca3a" />
+            <circle cx="118" cy="72" r="8" fill="#1982c4" />
+            <circle cx="42" cy="72" r="6" fill="#8ac926" />
+          </svg>
+        </div>
+
+        <h1 class="errorTitle">Oops! This canvas is completely blank</h1>
+        <p class="errorDesc">
+          We couldn't find the page or drawing you were looking for. It may have been moved, renamed, or the link might be misspelled.
+        </p>
+
+        <div class="errorActions">
+          <a class="hpStart hpBig" href="/">Start Drawing</a>
+          <a class="errorSecondaryBtn" href="/home">Go to Homepage</a>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  </div>
+
+  <style>
+    .errorHero {
+      text-align: center;
+      padding: 40px 14px 60px;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .errorBadge {
+      display: inline-block;
+      font-family: var(--font-brand);
+      font-size: 15px;
+      font-weight: 800;
+      color: #6a4c93;
+      background: #eee8fc;
+      padding: 6px 16px;
+      border-radius: 999px;
+      margin-bottom: 20px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .errorCanvasIllust {
+      margin: 10px auto 24px;
+      display: flex;
+      justify-content: center;
+      filter: drop-shadow(0 10px 18px rgba(80, 60, 140, 0.12));
+    }
+    .errorTitle {
+      font-family: var(--font-brand);
+      font-size: clamp(32px, 6vw, 46px);
+      font-weight: 800;
+      color: #2b2b3a;
+      line-height: 1.15;
+      margin: 0 0 14px;
+      letter-spacing: -0.01em;
+    }
+    .errorDesc {
+      font-family: var(--font-body);
+      font-size: 17px;
+      line-height: 1.65;
+      color: #57536e;
+      margin: 0 auto 32px;
+      max-width: 520px;
+    }
+    .errorActions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .errorSecondaryBtn {
+      display: inline-block;
+      font-family: var(--font-brand);
+      font-weight: 700;
+      font-size: 18px;
+      padding: 15px 32px;
+      border-radius: 999px;
+      background: #ffffff;
+      color: #2b2b3a;
+      border: 2px solid #ded8f0;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(80, 60, 140, 0.08);
+      transition: transform 0.12s ease, background 0.15s ease, border-color 0.15s ease;
+    }
+    .errorSecondaryBtn:hover {
+      background: #f7f5ff;
+      border-color: #b5a9e3;
+      transform: translateY(-1px);
+    }
+    .errorSecondaryBtn:focus-visible {
+      outline: 3px solid #2f7bff;
+      outline-offset: 3px;
+    }
+  </style>
+</SiteLayout>
