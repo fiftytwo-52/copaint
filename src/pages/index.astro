@@ -18,6 +18,7 @@ const keywords = "paint, ms paint, paint brush, ms paint online, ms paint art, o
       --bar: #ffffff;
     }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
     html, body { height: 100%; margin: 0; overscroll-behavior: none; }
     body {
       font-family: "Baloo 2", "Comic Sans MS", "Chalkboard SE", "Segoe UI Rounded", system-ui, sans-serif;
@@ -782,6 +783,7 @@ const keywords = "paint, ms paint, paint brush, ms paint online, ms paint art, o
     </div>
   </div>
 
+  <h1 class="sr-only">coPaint — Free Online Paint & Collaborative Whiteboard</h1>
   <main id="stage">
     <canvas id="board"></canvas>
     <div id="remoteCursors"></div>
@@ -2876,7 +2878,7 @@ function refreshToolIcons() {
   const st = STICKERS.find(s => s.id === stickerId);
   const ol = OUTLINES.find(o => o.id === outlineId);
   if (stickerMode === 'outline' && ol) {
-    stickerBtn.innerHTML = '<img src="' + ol.img + '" alt="">';
+    stickerBtn.innerHTML = '<img src="' + ol.img + '" alt="' + (ol.name || 'Coloring outline') + '">';
     stickerBtn.title = 'Stickers: ' + ol.name;
   } else if (stickerMode === 'emoji') {
     stickerBtn.innerHTML = '';
@@ -4108,7 +4110,7 @@ function refreshTeacherPanel() {
     let card = wrap.querySelector('[data-sid="' + s.sid + '"]');
     if (!card) {
       card = document.createElement('div'); card.className = 'tCard'; card.dataset.sid = s.sid;
-      card.innerHTML = '<img alt=""><div class="tCardName"><span class="tDot"></span><span class="tNm"></span>' +
+      card.innerHTML = '<img alt="Student canvas preview"><div class="tCardName"><span class="tDot"></span><span class="tNm"></span>' +
         '<span class="tCardBtns"><button type="button" class="tPauseBtn"></button>' +
         '<button type="button" class="tKickBtn" title="Remove from room">' + ICO_KICK + '</button></span></div>';
       card.onclick = () => openBig(s.sid);
@@ -4145,7 +4147,7 @@ function buildTeacherUI() {
       '<button class="cbDraw" id="cbDrawBtn">Draw on canvas</button>' +
       '<button class="cbClose" id="cbBigClose">✕ Close</button></div>' +
       '<div class="cbTools" id="cbTools" hidden></div>' +
-      '<div class="cbStage"><img id="cbBigImg" alt=""><canvas id="cbDrawLayer" hidden></canvas></div>' +
+      '<div class="cbStage"><img id="cbBigImg" alt="Enlarged student canvas preview"><canvas id="cbDrawLayer" hidden></canvas></div>' +
       '<div id="cbTextWrap" hidden><input id="cbTextInput" placeholder="Type text, then Add" maxlength="140" autocomplete="off">' +
       '<input type="color" id="cbTextBgPick" class="bgPick" value="#ffffff" title="Text background color">' +
       '<button type="button" id="cbTextBgNone" class="bgNone on" title="No background"></button>' +
@@ -4762,7 +4764,7 @@ function buildStudentUI() {
     '<div class="cbModal" id="cbFriend" hidden><div class="cbBox">' +
       '<div class="cbBoxHead"><span class="cbName" id="cbFriendName"></span>' +
       '<button class="cbClose" id="cbFriendClose">Close</button></div>' +
-      '<div class="cbStage"><img id="cbFriendImg" alt=""></div>' +
+      '<div class="cbStage"><img id="cbFriendImg" alt="Friend canvas preview"></div>' +
       '<div class="cbNote">Watching a friend — view only. Close to go back to your work.</div>' +
     '</div></div>';
   document.getElementById('sLeaveBtn').onclick = () => leaveRoom(false);
