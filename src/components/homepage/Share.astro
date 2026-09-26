@@ -2,7 +2,9 @@
 /* Homepage "Share coPaint" section: Facebook, WhatsApp, Instagram and X (Twitter) share buttons.
    Share URLs are server-rendered with the production domain as a fallback, then upgraded at
    runtime to the visitor's actual URL (so preview domains and custom domains work too). */
-const siteUrl = "https://copaint-qxc.pages.dev/";
+import { SITE_URL } from '../../config';
+
+const siteUrl = `${SITE_URL}/`;
 const shareText = "coPaint — a free online drawing app for kids. Draw, paint and create together with no sign-up!";
 const encodedUrl = encodeURIComponent(siteUrl);
 const encodedText = encodeURIComponent(shareText);

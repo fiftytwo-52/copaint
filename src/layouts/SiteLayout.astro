@@ -1,5 +1,7 @@
 ---
 /* Shared page shell for coPaint: doctype, head (meta, title, favicon, SEO) and body slot. */
+import { SITE_URL } from '../config';
+
 interface Props {
   title?: string;
   description?: string;
@@ -9,27 +11,27 @@ interface Props {
 }
 
 const {
-  title = "coPaint — Free Online Paint & Collaborative Whiteboard",
+  title = "coPaint — Free Online Paint & Whiteboard App",
   description = "Free online paint tool and digital whiteboard. Draw together with MS Paint-like tools, brush styles, shapes, stickers, and realtime classroom collaboration with no login required.",
-  keywords = "paint, ms paint, ms paint online, online paint, free online paint, whiteboard, whiteboard online, online whiteboard, digital whiteboard, virtual whiteboard, free whiteboard, collaborative paint, draw together online whiteboard",
-  canonical = "https://copaint-qxc.pages.dev/",
+  keywords,
+  canonical = "/",
   noindex = false
 } = Astro.props;
 
-const siteUrl = "https://copaint-qxc.pages.dev";
-const fullCanonical = canonical.startsWith("http") ? canonical : `${siteUrl}${canonical}`;
+const siteUrl = SITE_URL;
+const fullCanonical = canonical.startsWith("http") ? canonical : `${siteUrl}${canonical.startsWith('/') ? canonical : '/' + canonical}`;
 ---
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
 
   <meta name="theme-color" content="#2b2b3a" />
   <meta name="title" content={title} />
   <meta name="description" content={description} />
-  <meta name="keywords" content={keywords} />
+  {keywords && <meta name="keywords" content={keywords} />}
   <meta name="author" content="coPaint" />
   <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
   <link rel="canonical" href={fullCanonical} />
@@ -58,8 +60,9 @@ const fullCanonical = canonical.startsWith("http") ? canonical : `${siteUrl}${ca
   <meta property="twitter:image" content={`${siteUrl}/og-image.png`} />
   <meta property="twitter:image:alt" content="coPaint - Free Online Paint and Collaborative Whiteboard" />
 
-  <!-- Favicon -->
+  <!-- Favicons -->
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232b2b3a'/%3E%3Cpath d='M20 45 L43 22' stroke='white' stroke-width='7' stroke-linecap='round'/%3E%3Ccircle cx='47' cy='18' r='5.5' fill='white'/%3E%3C/svg%3E" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
   <!-- JSON-LD Structured Data for WebApplication -->
   <script type="application/ld+json" set:html={JSON.stringify({
