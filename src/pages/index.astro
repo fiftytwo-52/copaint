@@ -2451,50 +2451,38 @@ canvas.addEventListener('pointerdown', (e) => {
     return;
   }
   if (tool === 'sticker') {
-    if (stickerMode === 'outline' || stickerMode === 'emoji') {
-      if (pendingOutline) {
-        if (hitTest(p) === pendingOutline) {
-          // drag the just-placed outline to move it; clicking elsewhere fixes it
-          drag = { mode: 'move', lx: p.x, ly: p.y, moved: false };
-          selected = pendingOutline;
-          redraw();
-          return;
-        }
-        // clicked elsewhere — fix the outline in place (same as pending shapes)
-        pendingOutline = null;
-        selected = null;
+    const pend = pendingOutline || pendingSticker;
+    if (pend) {
+      if (hitTest(p) === pend) {
+        // drag the just-placed sticker/outline to move it; clicking elsewhere fixes it
+        drag = { mode: 'move', lx: p.x, ly: p.y, moved: false };
+        selected = pend;
         redraw();
         return;
       }
-      let stampSrc = null;
-      if (stickerMode === 'outline') {
-        const ol = OUTLINES.find(o => o.id === outlineId);
-        if (ol) stampSrc = ol.img;
-      } else {
-        stampSrc = emojiDataURL(emojiChar);
-      }
-      if (stampSrc) {
-        // drag a box like the shape tool — the stamp scales freely to fit it
-        preview = { type: 'image', src: stampSrc, ax: p.x, ay: p.y, x: p.x, y: p.y, w: 0, h: 0, alpha: 1 };
-      }
+      // clicked elsewhere — fix the sticker/outline in place (same as pending shapes)
+      pendingOutline = null;
+      pendingSticker = null;
+      selected = null;
+      redraw();
+      return;
+    }
+    let stampSrc = null;
+    if (stickerMode === 'outline') {
+      const ol = OUTLINES.find(o => o.id === outlineId);
+      if (ol) stampSrc = ol.img;
+    } else if (stickerMode === 'emoji') {
+      stampSrc = emojiDataURL(emojiChar);
     } else {
-      if (pendingSticker) {
-        if (hitTest(p) === pendingSticker) {
-          // drag the just-placed sticker to move it; clicking elsewhere fixes it and stamps a new one
-          drag = { mode: 'move', lx: p.x, ly: p.y, moved: false };
-          selected = pendingSticker;
-          redraw();
-          return;
-        }
-        pendingSticker = null; // fixed in place — fall through and stamp a fresh one
-        selected = null;
+      const st = STICKERS.find(s => s.id === stickerId);
+      if (st) {
+        stampSrc = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(st.svg);
+        if (stickerImgs[st.id]) imageCache[stampSrc] = stickerImgs[st.id];
       }
-      const st = { type: 'sticker', id: stickerId, x: p.x, y: p.y, s: size, alpha: opacity };
-      items.push(st);
-      pendingSticker = st; selected = st; // stays resizable/rotatable until you click elsewhere
-      redoStack.length = 0;
-      redraw(); saveState();
-      syncAdd(st);
+    }
+    if (stampSrc) {
+      // drag a box like the shape tool — the stamp scales freely to fit it
+      preview = { type: 'image', src: stampSrc, ax: p.x, ay: p.y, x: p.x, y: p.y, w: 0, h: 0, alpha: opacity };
     }
     return;
   }
@@ -2700,15 +2688,15 @@ function endPointer() {
   if (drawing) { const d = drawing; drawing = null; commit(d); }
   else if (preview) {
     const pv = preview; preview = null;
-    if (pv.type === 'image') { // coloring outline drag-to-place
+    if (pv.type === 'image') { // sticker / outline / emoji drag-to-place
       let placed;
       if (pv.w > 8 && pv.h > 8) placed = pv; // placed at the dragged size
       else { // simple tap — stamp at the default size
         const w = Math.max(48, size * 7);
-        placed = { type: 'image', src: pv.src, x: pv.ax - w / 2, y: pv.ay - w / 2, w, h: w, alpha: 1 };
+        placed = { type: 'image', src: pv.src, x: pv.ax - w / 2, y: pv.ay - w / 2, w, h: w, alpha: pv.alpha ?? 1 };
       }
       items.push(placed);
-      pendingOutline = placed; selected = placed; // stays movable until you click elsewhere
+      pendingOutline = placed; pendingSticker = placed; selected = placed; // stays movable/resizable until you click elsewhere
       redoStack.length = 0;
       redraw(); saveState();
       syncAdd(placed);
@@ -3055,7 +3043,7 @@ function buildPops() {
       b.innerHTML = st.svg;
       b.title = st.name;
       if (st.id === stickerId && stickerMode === 'vector') b.classList.add('picked');
-      b.onclick = () => { stickerId = st.id; stickerMode = 'vector'; setTool('sticker'); refreshToolIcons(); hidePops(); saveState(); };
+      b.onclick = () => { stickerId = st.id; stickerMode = 'vector'; setTool('sticker'); refreshToolIcons(); hidePops(); saveState(); toast(st.name + ' picked — drag on the canvas to place it'); };
       sgrid.appendChild(b);
     }
   }
@@ -4544,6 +4532,12 @@ function setupDrawOverlay() {
   const stampSrc = () => {
     if (stickerMode === 'outline') { const ol = OUTLINES.find(o => o.id === outlineId); return ol ? ol.img : null; }
     if (stickerMode === 'emoji') return emojiDataURL(emojiChar);
+    const st = STICKERS.find(s => s.id === stickerId);
+    if (st) {
+      const src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(st.svg);
+      if (stickerImgs[st.id]) imageCache[src] = stickerImgs[st.id];
+      return src;
+    }
     return null;
   };
   const liveItem = () => {
@@ -4610,8 +4604,11 @@ function setupDrawOverlay() {
     paintOverlayMarks();
     if (!it) return;
     if (it.type === 'stroke' && it.points.length < 1) return;
-    if ((it.type === 'shape' || it.type === 'image') && Math.abs(it.x1 - it.x0) < 4 && Math.abs(it.y1 - it.y0) < 4) return;
-    if (it.type === 'image' && (!it.w || !it.h)) return;
+    if (it.type === 'image' && (!it.w || !it.h)) {
+      const w = Math.max(48, size * 7);
+      it.x = Math.round(it.x - w / 2); it.y = Math.round(it.y - w / 2);
+      it.w = w; it.h = w;
+    }
     shipTeacherItem(it);
   };
   ov.addEventListener('pointerup', (e) => { if (selOp) selPointerUp(e); up(); });
