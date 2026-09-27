@@ -250,18 +250,6 @@ const description = "Free online paint app and collaborative digital whiteboard.
       color: #787399; min-width: 36px; flex-shrink: 0;
     }
     #shapeFillColors, #shapeOutlineColors { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
-    .sbar-op {
-      display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0;
-      padding: 0 4px; height: 26px; border-radius: 8px; background: #f7f6fc;
-      border: 1px solid #e3dcff; box-sizing: border-box;
-    }
-    .sbar-op-icon { width: 12px; height: 12px; flex-shrink: 0; display: block; opacity: .75; }
-    .sbar-op input[type="range"] {
-      width: 44px; height: 5px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0;
-    }
-    .sbar-op-val {
-      font-size: 9px; font-weight: 800; color: #787399; min-width: 25px; text-align: right; flex-shrink: 0;
-    }
     #outlineSize { width: 44px; height: 6px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
     .step-tiny {
       width: 18px; height: 18px; border-radius: 5px; border: 1px solid #dcd7f5;
@@ -679,10 +667,6 @@ const description = "Free online paint app and collaborative digital whiteboard.
       .fdot { width: 18px; height: 18px; }
       #shapeFillBar button.mini { width: 24px; height: 24px; }
       #shapeFillBar button.mini.rainbow { width: 18px; height: 18px; }
-      .sbar-op { height: 22px; padding: 0 3px; gap: 2px; }
-      .sbar-op input[type="range"] { width: 32px; }
-      .sbar-op-val { font-size: 8px; min-width: 20px; }
-      .sbar-op-icon { width: 10px; height: 10px; }
       #outlineSize { width: 32px; }
       .step-tiny { width: 15px; height: 15px; }
       .step-tiny svg { width: 8px; height: 8px; }
@@ -885,11 +869,6 @@ const description = "Free online paint app and collaborative digital whiteboard.
         <span class="sbar-label">Fill</span>
         <div id="shapeFillColors"></div>
         <button class="mini rainbow" id="shapeFillCustomBtn" title="Custom fill color"></button>
-        <div class="sbar-op" title="Fill opacity">
-          <svg viewBox="0 0 24 24" class="sbar-op-icon"><circle cx="12" cy="12" r="9" fill="none" stroke="#2b2b3a" stroke-width="2.2"/><path d="M12 3 A9 9 0 0 1 12 21 Z" fill="#2b2b3a"/></svg>
-          <input type="range" id="shapeFillOpacity" min="10" max="100" value="100" title="Fill opacity" aria-label="Fill opacity" />
-          <span class="sbar-op-val" id="shapeFillOpacityVal">100%</span>
-        </div>
         <button class="mini" id="shapeFillNoFill" title="No fill"></button>
         <button class="mini" id="shapeFillPattern" title="Fill style"></button>
       </div>
@@ -897,11 +876,6 @@ const description = "Free online paint app and collaborative digital whiteboard.
         <span class="sbar-label">Outline</span>
         <div id="shapeOutlineColors"></div>
         <button class="mini rainbow" id="shapeOutlineCustomBtn" title="Custom outline color"></button>
-        <div class="sbar-op" title="Outline opacity">
-          <svg viewBox="0 0 24 24" class="sbar-op-icon"><circle cx="12" cy="12" r="9" fill="none" stroke="#2b2b3a" stroke-width="2.2"/><path d="M12 3 A9 9 0 0 1 12 21 Z" fill="#2b2b3a"/></svg>
-          <input type="range" id="shapeOutlineOpacity" min="10" max="100" value="100" title="Outline opacity" aria-label="Outline opacity" />
-          <span class="sbar-op-val" id="shapeOutlineOpacityVal">100%</span>
-        </div>
         <button class="step-tiny" id="outlineMinus" title="Thinner outline">
           <svg viewBox="0 0 12 12"><path d="M2.5 6h7" stroke="#2b2b3a" stroke-width="1.8" stroke-linecap="round"/></svg>
         </button>
@@ -3460,6 +3434,15 @@ document.addEventListener('pointerdown', (e) => {
     [clearPop, clearBtn]
   ];
   for (const [pop, btn] of pairs) {
+    if (pop === colorPop) {
+      if (pop && !pop.hidden && !pop.contains(e.target)) {
+        const isAnchor = (colorDot && colorDot.contains(e.target)) ||
+                         (shapeFillCustomBtn && shapeFillCustomBtn.contains(e.target)) ||
+                         (shapeOutlineCustomBtn && shapeOutlineCustomBtn.contains(e.target));
+        if (!isAnchor) pop.hidden = true;
+      }
+      continue;
+    }
     if (pop && !pop.hidden && !pop.contains(e.target) && (!btn || !btn.contains(e.target))) {
       pop.hidden = true;
     }
@@ -3478,51 +3461,134 @@ function buildColors() {
   colorDot.title = 'Color ' + color + ' · Opacity ' + Math.round(opacity * 100) + '% — tap to change';
   if (typeof buildBucketPop === 'function') buildBucketPop();
 }
+
+let colorPopTarget = 'main'; // 'main' | 'fill' | 'outline'
+
 function buildColorPop() {
   colorPop.innerHTML = '';
+  const ft = fillTarget();
+  let curCol = color;
+  let curOp = opacity;
+  let opLabelText = 'Opacity';
+
+  if (colorPopTarget === 'fill') {
+    curCol = (ft && ft.fillColor) || (pendingShape && pendingShape.fillColor) || (selected && selected.fillColor) || fillColor || '#facc15';
+    curOp = (ft && ft.fillOpacity !== undefined) ? ft.fillOpacity : fillOpacity;
+    opLabelText = 'Fill Opacity';
+  } else if (colorPopTarget === 'outline') {
+    curCol = (ft && ft.color) || (pendingShape && pendingShape.color) || (selected && selected.color) || color || '#1f2937';
+    curOp = (ft && ft.outlineOpacity !== undefined) ? ft.outlineOpacity : outlineOpacity;
+    opLabelText = 'Outline Opacity';
+  }
+
   for (const c of COLORS) {
     const b = document.createElement('button');
-    b.className = 'sw' + (c.toLowerCase() === color.toLowerCase() ? ' active' : '');
+    b.className = 'sw' + (c.toLowerCase() === curCol.toLowerCase() ? ' active' : '');
     b.style.background = c;
     b.title = c;
     b.onclick = () => {
-      color = c;
-      const ft = fillTarget();
-      if (ft) ft.color = c;
-      if (pendingText) pendingText.color = c;
-      buildColors(); buildColorPop(); redraw(); saveState();
+      if (colorPopTarget === 'fill') {
+        fillColor = c; fillShapes = true;
+        const target = fillTarget();
+        if (target) { target.fillColor = c; target.fill = true; }
+        renderFillColor(); renderFill();
+        if (shapeFillPattern) {
+          shapeFillPattern.innerHTML = renderFillIcon((target && target.fillStyle) || 'solid', c);
+        }
+      } else if (colorPopTarget === 'outline') {
+        color = c;
+        const target = fillTarget();
+        if (target) target.color = c;
+        buildColors(); renderOutlineColor();
+      } else {
+        color = c;
+        const target = fillTarget();
+        if (target) target.color = c;
+        if (pendingText) pendingText.color = c;
+        buildColors();
+      }
+      buildColorPop(); redraw(); saveState();
     };
     colorPop.appendChild(b);
   }
   const custom = document.createElement('button');
   custom.className = 'sw rainbow'; custom.title = 'Custom color';
-  custom.onclick = () => customColorInput.click();
+  custom.onclick = () => {
+    if (colorPopTarget === 'fill') {
+      shapeFillCustom.value = curCol.startsWith('#') && curCol.length === 7 ? curCol : '#facc15';
+      shapeFillCustom.click();
+    } else if (colorPopTarget === 'outline') {
+      shapeOutlineCustom.value = curCol.startsWith('#') && curCol.length === 7 ? curCol : '#1f2937';
+      shapeOutlineCustom.click();
+    } else {
+      customColorInput.value = color.startsWith('#') && color.length === 7 ? color : '#1f2937';
+      customColorInput.click();
+    }
+  };
   colorPop.appendChild(custom);
   // opacity lives inside the color picker
   const ow = document.createElement('div');
   ow.className = 'opwrap';
   const olab = document.createElement('span');
-  olab.textContent = 'Opacity';
+  olab.textContent = opLabelText;
   const oslider = document.createElement('input');
   oslider.type = 'range'; oslider.min = '10'; oslider.max = '100';
-  oslider.value = String(Math.round(opacity * 100));
-  oslider.setAttribute('aria-label', 'Opacity');
-  oslider.title = 'Opacity';
+  oslider.value = String(Math.round(curOp * 100));
+  oslider.setAttribute('aria-label', opLabelText);
+  oslider.title = opLabelText + ': ' + oslider.value + '%';
   const oval = document.createElement('span');
   oval.className = 'opval';
   oval.textContent = oslider.value + '%';
   oslider.oninput = () => {
-    opacity = +oslider.value / 100;
-    oval.textContent = oslider.value + '%';
-    const ft = fillTarget();
-    if (ft) ft.alpha = opacity;
-    if (pendingText) pendingText.alpha = opacity;
-    buildColors(); redraw(); saveState();
+    const val = +oslider.value;
+    oval.textContent = val + '%';
+    oslider.title = opLabelText + ': ' + val + '%';
+    if (colorPopTarget === 'fill') {
+      setShapeFillOpacity(val);
+    } else if (colorPopTarget === 'outline') {
+      setShapeOutlineOpacity(val);
+    } else {
+      opacity = val / 100;
+      const target = fillTarget();
+      if (target) target.alpha = opacity;
+      if (pendingText) pendingText.alpha = opacity;
+      buildColors(); redraw(); saveState();
+    }
   };
   ow.append(olab, oslider, oval);
   colorPop.appendChild(ow);
 }
-colorDot.onclick = () => togglePop(colorPop, colorDot);
+
+function toggleColorPop(target, btn) {
+  const isOpenSame = !colorPop.hidden && colorPopTarget === target;
+  hidePops();
+  if (!isOpenSame) {
+    colorPopTarget = target;
+    buildColorPop();
+    colorPop.hidden = false;
+    if (btn) {
+      const r = btn.getBoundingClientRect();
+      const w = colorPop.offsetWidth || 180, h = colorPop.offsetHeight || 190;
+      if (btn.id === 'shapeFillCustomBtn' || btn.id === 'shapeOutlineCustomBtn') {
+        let px = Math.round(r.left + r.width / 2 - w / 2);
+        px = Math.max(8, Math.min(window.innerWidth - w - 8, px));
+        let py = Math.round(r.bottom + 8);
+        if (py + h > window.innerHeight - 8) {
+          py = Math.max(8, Math.round(r.top - h - 8));
+        }
+        colorPop.style.left = px + 'px';
+        colorPop.style.top = py + 'px';
+      } else if (window.innerWidth <= 760) {
+        colorPop.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, Math.round(r.right + 8))) + 'px';
+        colorPop.style.top = Math.max(8, Math.min(window.innerHeight - h - 8, Math.round(r.top - 4))) + 'px';
+      } else {
+        colorPop.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, Math.round(r.right + 8))) + 'px';
+        colorPop.style.top = Math.max(8, Math.min(window.innerHeight - h - 8, Math.round(r.top - 4))) + 'px';
+      }
+    }
+  }
+}
+colorDot.onclick = () => toggleColorPop('main', colorDot);
 customColorInput.addEventListener('input', () => {
   color = customColorInput.value;
   const ft = fillTarget();
@@ -3570,8 +3636,6 @@ const shapeFillColors = document.getElementById('shapeFillColors');
 const shapeFillNoFill = document.getElementById('shapeFillNoFill');
 const shapeFillCustomBtn = document.getElementById('shapeFillCustomBtn');
 const shapeFillCustom = document.getElementById('shapeFillCustom');
-const shapeFillOpacity = document.getElementById('shapeFillOpacity');
-const shapeFillOpacityVal = document.getElementById('shapeFillOpacityVal');
 function fillTarget() {
   if (pendingShape && pendingShape.type === 'shape') return pendingShape;
   if (tool === 'select' && selected && selected.type === 'shape') return selected;
@@ -3580,12 +3644,16 @@ function fillTarget() {
 function setShapeFillOpacity(val) {
   fillOpacity = Math.max(0.1, Math.min(1, val / 100));
   const pct = Math.round(fillOpacity * 100) + '%';
-  if (shapeFillOpacity) shapeFillOpacity.value = String(Math.round(fillOpacity * 100));
-  if (shapeFillOpacityVal) shapeFillOpacityVal.textContent = pct;
   const patSlider = document.getElementById('patternOpacity');
   const patVal = document.getElementById('patternOpacityVal');
   if (patSlider) patSlider.value = String(Math.round(fillOpacity * 100));
   if (patVal) patVal.textContent = pct;
+  if (!colorPop.hidden && colorPopTarget === 'fill') {
+    const copSlider = colorPop.querySelector('input[type="range"]');
+    const copVal = colorPop.querySelector('.opval');
+    if (copSlider) copSlider.value = String(Math.round(fillOpacity * 100));
+    if (copVal) copVal.textContent = pct;
+  }
   const t = fillTarget();
   if (t) {
     t.fillOpacity = fillOpacity;
@@ -3596,11 +3664,6 @@ function setShapeFillOpacity(val) {
   redraw();
   saveState();
 }
-if (shapeFillOpacity) {
-  shapeFillOpacity.value = String(Math.round(fillOpacity * 100));
-  if (shapeFillOpacityVal) shapeFillOpacityVal.textContent = Math.round(fillOpacity * 100) + '%';
-  shapeFillOpacity.addEventListener('input', () => setShapeFillOpacity(+shapeFillOpacity.value));
-}
 shapeFillPattern.addEventListener('click', (e) => { e.stopPropagation(); togglePop(fillStylePop, shapeFillPattern); });
 shapeFillNoFill.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#2b2b3a" stroke-width="2"/><line x1="6.5" y1="17.5" x2="17.5" y2="6.5" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round"/></svg>';
 shapeFillNoFill.addEventListener('click', (e) => {
@@ -3609,14 +3672,15 @@ shapeFillNoFill.addEventListener('click', (e) => {
   fillShapes = false; t.fill = false;
   renderFill(); redraw(); saveState();
 });
-shapeFillCustomBtn.addEventListener('click', (e) => { e.stopPropagation(); shapeFillCustom.click(); });
+shapeFillCustomBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleColorPop('fill', shapeFillCustomBtn); });
 shapeFillCustom.addEventListener('input', () => {
-  const t = fillTarget(); if (!t) return;
+  const t = fillTarget();
   fillColor = shapeFillCustom.value; fillShapes = true;
-  t.fillColor = fillColor; t.fill = true;
+  if (t) { t.fillColor = fillColor; t.fill = true; }
   renderFillColor(); renderFill(); redraw(); saveState();
+  buildColorPop();
   if (shapeFillPattern) {
-    shapeFillPattern.innerHTML = renderFillIcon(t.fillStyle || 'solid', fillColor);
+    shapeFillPattern.innerHTML = renderFillIcon((t && t.fillStyle) || 'solid', fillColor);
   }
 });
 function renderFillColor() {
@@ -3638,8 +3702,6 @@ function renderFill() {
 const shapeOutlineColors = document.getElementById('shapeOutlineColors');
 const shapeOutlineCustomBtn = document.getElementById('shapeOutlineCustomBtn');
 const shapeOutlineCustom = document.getElementById('shapeOutlineCustom');
-const shapeOutlineOpacity = document.getElementById('shapeOutlineOpacity');
-const shapeOutlineOpacityVal = document.getElementById('shapeOutlineOpacityVal');
 const outlineMinus = document.getElementById('outlineMinus');
 const outlinePlus = document.getElementById('outlinePlus');
 const outlineSize = document.getElementById('outlineSize');
@@ -3647,8 +3709,12 @@ const outlineSize = document.getElementById('outlineSize');
 function setShapeOutlineOpacity(val) {
   outlineOpacity = Math.max(0.1, Math.min(1, val / 100));
   const pct = Math.round(outlineOpacity * 100) + '%';
-  if (shapeOutlineOpacity) shapeOutlineOpacity.value = String(Math.round(outlineOpacity * 100));
-  if (shapeOutlineOpacityVal) shapeOutlineOpacityVal.textContent = pct;
+  if (!colorPop.hidden && colorPopTarget === 'outline') {
+    const copSlider = colorPop.querySelector('input[type="range"]');
+    const copVal = colorPop.querySelector('.opval');
+    if (copSlider) copSlider.value = String(Math.round(outlineOpacity * 100));
+    if (copVal) copVal.textContent = pct;
+  }
   const t = fillTarget();
   if (t) {
     t.outlineOpacity = outlineOpacity;
@@ -3656,16 +3722,13 @@ function setShapeOutlineOpacity(val) {
   redraw();
   saveState();
 }
-if (shapeOutlineOpacity) {
-  shapeOutlineOpacity.value = String(Math.round(outlineOpacity * 100));
-  if (shapeOutlineOpacityVal) shapeOutlineOpacityVal.textContent = Math.round(outlineOpacity * 100) + '%';
-  shapeOutlineOpacity.addEventListener('input', () => setShapeOutlineOpacity(+shapeOutlineOpacity.value));
-}
-shapeOutlineCustomBtn.addEventListener('click', (e) => { e.stopPropagation(); shapeOutlineCustom.click(); });
+shapeOutlineCustomBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleColorPop('outline', shapeOutlineCustomBtn); });
 shapeOutlineCustom.addEventListener('input', () => {
-  const t = fillTarget(); if (!t) return;
-  color = shapeOutlineCustom.value; t.color = color;
+  const t = fillTarget();
+  color = shapeOutlineCustom.value;
+  if (t) t.color = color;
   buildColors(); renderOutlineColor(); redraw(); saveState();
+  buildColorPop();
 });
 function renderOutlineColor() {
   let matched = false;
@@ -3732,8 +3795,6 @@ function updateShapeFillBar() {
   shapeFillPattern.title = 'Fill style: ' + (t.fillStyle || 'solid');
 
   const curFillOp = t.fillOpacity !== undefined ? t.fillOpacity : fillOpacity;
-  if (shapeFillOpacity) shapeFillOpacity.value = String(Math.round(curFillOp * 100));
-  if (shapeFillOpacityVal) shapeFillOpacityVal.textContent = Math.round(curFillOp * 100) + '%';
   const patSlider = document.getElementById('patternOpacity');
   const patVal = document.getElementById('patternOpacityVal');
   if (patSlider) patSlider.value = String(Math.round(curFillOp * 100));
@@ -3755,14 +3816,12 @@ function updateShapeFillBar() {
   renderOutlineColor();
   renderOutlineSize();
 
-  const curOutOp = t.outlineOpacity !== undefined ? t.outlineOpacity : outlineOpacity;
-  if (shapeOutlineOpacity) shapeOutlineOpacity.value = String(Math.round(curOutOp * 100));
-  if (shapeOutlineOpacityVal) shapeOutlineOpacityVal.textContent = Math.round(curOutOp * 100) + '%';
-
   const noBorder = t.border === false;
   shapeNoBorder.classList.toggle('active', noBorder);
   shapeNoBorder.classList.toggle('off', noBorder);
   shapeNoBorder.title = noBorder ? 'Border off — tap to show border' : 'No border';
+
+  if (!colorPop.hidden) buildColorPop();
   const b = rotAABB(t);
   const bx = b.x0 * zoom + view.x, bwpx = (b.x1 - b.x0) * zoom;
   const barW = shapeFillBar.offsetWidth || 230;
