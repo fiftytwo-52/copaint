@@ -231,35 +231,40 @@ const description = "Free online paint app and collaborative digital whiteboard.
     /* floating shape-tools bar that follows the selected shape */
     #shapeFillBar {
       position: absolute; z-index: 25; display: flex; flex-direction: column; align-items: stretch; gap: 6px;
-      background: #fff; border-radius: 14px; padding: 8px 10px;
-      box-shadow: 0 4px 16px rgba(80,60,140,.25);
+      background: #ffffff; border: 1.5px solid #e2dcfa; border-radius: 12px; padding: 6px 8px;
+      box-shadow: 0 6px 20px rgba(43,43,58,.18);
+      max-width: calc(100vw - 16px);
+      box-sizing: border-box;
     }
     #shapeFillBar[hidden] { display: none; }
-    .sbar-row { display: flex; align-items: center; gap: 6px; }
+    .sbar-row { display: flex; align-items: center; gap: 5px; flex-wrap: nowrap; }
     .sbar-label {
       font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
-      color: #8b86a8; min-width: 46px; flex-shrink: 0;
+      color: #787399; min-width: 36px; flex-shrink: 0;
     }
-    #shapeOutlineColors { display: flex; gap: 5px; align-items: center; }
-    #shapeFillBar button.mini.stepbtn { font-size: 18px; font-weight: 800; color: #2b2b3a; }
-    #outlineSize { width: 84px; accent-color: var(--accent); cursor: pointer; }
+    #shapeFillColors, #shapeOutlineColors { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
+    #outlineSize { width: 56px; height: 6px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
     .fdot {
-      width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff;
-      outline: 2px solid rgba(0,0,0,.12); cursor: pointer; padding: 0;
+      width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff;
+      outline: 1.5px solid rgba(0,0,0,.15); cursor: pointer; padding: 0; flex-shrink: 0;
+      transition: transform .12s ease;
     }
     .fdot:hover { transform: scale(1.15); }
-    .fdot.active { outline: 3px solid var(--accent); }
+    .fdot.active { outline: 2.5px solid var(--accent); transform: scale(1.1); }
     #shapeFillBar button.mini {
-      width: 34px; height: 34px; border-radius: 10px; border: 2px solid #e3dcff;
-      background: #fff; cursor: pointer; padding: 3px;
+      width: 28px; height: 28px; border-radius: 8px; border: 1.5px solid #e3dcff;
+      background: #fff; cursor: pointer; padding: 3px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      box-sizing: border-box;
     }
     #shapeFillBar button.mini svg { width: 100%; height: 100%; display: block; }
-    #shapeFillBar button.mini.off { filter: grayscale(1); opacity: .45; }
+    #shapeFillBar button.mini.off { opacity: .5; }
     #shapeFillBar button.mini.rainbow {
-      border-radius: 50%; padding: 0;
+      border-radius: 50%; padding: 0; width: 22px; height: 22px; border: 2px solid #fff;
+      outline: 1.5px solid rgba(0,0,0,.15);
       background: conic-gradient(#ef4444,#facc15,#22c55e,#3b82f6,#8b5cf6,#ef4444);
     }
-    #shapeFillNoFill.active { outline: 3px solid #2b2b3a; background: #eef0f4; }
+    #shapeFillBar button.mini.rainbow.active { outline: 2.5px solid var(--accent); transform: scale(1.1); }
+    #shapeFillNoFill.active, #shapeNoBorder.active { outline: 2.5px solid var(--accent); background: #f0edff; }
     /* sticker popover tabs */
     .popTabs { display: flex; gap: 6px; margin-bottom: 2px; grid-column: 1 / -1; }
     .popTabs button {
@@ -640,6 +645,13 @@ const description = "Free online paint app and collaborative digital whiteboard.
         max-height: calc(100dvh - 24px);
         overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
       }
+      #shapeFillBar { padding: 5px 6px; gap: 4px; }
+      .sbar-row { gap: 4px; }
+      .sbar-label { min-width: 32px; font-size: 9px; }
+      .fdot { width: 19px; height: 19px; }
+      #shapeFillBar button.mini { width: 25px; height: 25px; }
+      #shapeFillBar button.mini.rainbow { width: 19px; height: 19px; }
+      #outlineSize { width: 44px; }
       .cbBox { width: calc(100vw - 24px); }
     }
     /* short screens: shrink so the whole toolbar still fits without scrolling */
@@ -845,9 +857,7 @@ const description = "Free online paint app and collaborative digital whiteboard.
         <span class="sbar-label">Outline</span>
         <div id="shapeOutlineColors"></div>
         <button class="mini rainbow" id="shapeOutlineCustomBtn" title="Custom outline color"></button>
-        <button class="mini stepbtn" id="outlineMinus" title="Thinner outline">−</button>
         <input type="range" id="outlineSize" min="2" max="60" value="8" title="Outline thickness" aria-label="Outline thickness" />
-        <button class="mini stepbtn" id="outlinePlus" title="Thicker outline">+</button>
         <button class="mini" id="shapeNoBorder" title="No border"></button>
       </div>
     </div>
@@ -3292,6 +3302,9 @@ holdRepeat(sizeMinus, () => setSize(size - 2));
 holdRepeat(sizePlus, () => setSize(size + 2));
 
 /* ---------------- fill tools: floating bar, only while a shape is selected ---------------- */
+const SHAPE_FILL_PRESETS = ['#facc15', '#3b82f6', '#ef4444'];
+const SHAPE_OUTLINE_PRESETS = ['#1f2937', '#ef4444', '#3b82f6'];
+
 const shapeFillColors = document.getElementById('shapeFillColors');
 const shapeFillNoFill = document.getElementById('shapeFillNoFill');
 const shapeFillCustomBtn = document.getElementById('shapeFillCustomBtn');
@@ -3302,7 +3315,7 @@ function fillTarget() {
   return null;
 }
 shapeFillPattern.addEventListener('click', (e) => { e.stopPropagation(); togglePop(fillStylePop, shapeFillPattern); });
-shapeFillNoFill.innerHTML = '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="13" fill="none" stroke="#2b2b3a" stroke-width="3.5"/><line x1="10" y1="30" x2="30" y2="10" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/></svg>';
+shapeFillNoFill.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#2b2b3a" stroke-width="2"/><line x1="6.5" y1="17.5" x2="17.5" y2="6.5" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round"/></svg>';
 shapeFillNoFill.addEventListener('click', (e) => {
   e.stopPropagation();
   const t = fillTarget(); if (!t) return;
@@ -3317,9 +3330,15 @@ shapeFillCustom.addEventListener('input', () => {
   renderFillColor(); renderFill(); redraw(); saveState();
 });
 function renderFillColor() {
+  let matched = false;
   shapeFillColors.querySelectorAll('.fdot').forEach(d => {
-    d.classList.toggle('active', d.dataset.c.toLowerCase() === fillColor.toLowerCase());
+    const isMatch = d.dataset.c.toLowerCase() === fillColor.toLowerCase();
+    d.classList.toggle('active', isMatch);
+    if (isMatch) matched = true;
   });
+  if (shapeFillCustomBtn) {
+    shapeFillCustomBtn.classList.toggle('active', !matched && fillShapes);
+  }
 }
 function renderFill() {
   shapeFillNoFill.classList.toggle('active', !fillShapes);
@@ -3339,9 +3358,15 @@ shapeOutlineCustom.addEventListener('input', () => {
   buildColors(); renderOutlineColor(); redraw(); saveState();
 });
 function renderOutlineColor() {
+  let matched = false;
   shapeOutlineColors.querySelectorAll('.fdot').forEach(d => {
-    d.classList.toggle('active', d.dataset.c.toLowerCase() === color.toLowerCase());
+    const isMatch = d.dataset.c.toLowerCase() === color.toLowerCase();
+    d.classList.toggle('active', isMatch);
+    if (isMatch) matched = true;
   });
+  if (shapeOutlineCustomBtn) {
+    shapeOutlineCustomBtn.classList.toggle('active', !matched);
+  }
 }
 function renderOutlineSize() {
   const t = fillTarget();
@@ -3351,12 +3376,15 @@ function renderOutlineSize() {
 }
 outlineSize.addEventListener('input', () => setSize(+outlineSize.value));
 const shapeNoBorder = document.getElementById('shapeNoBorder');
-shapeNoBorder.innerHTML = '<svg viewBox="0 0 40 40"><rect x="9" y="9" width="22" height="22" rx="3" fill="none" stroke="#2b2b3a" stroke-width="3.5"/><line x1="10" y1="30" x2="30" y2="10" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round"/></svg>';
+shapeNoBorder.innerHTML = '<svg viewBox="0 0 24 24"><rect x="4.5" y="4.5" width="15" height="15" rx="2.5" fill="none" stroke="#2b2b3a" stroke-width="2"/><line x1="5.5" y1="18.5" x2="18.5" y2="5.5" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round"/></svg>';
 shapeNoBorder.addEventListener('click', (e) => {
   e.stopPropagation();
   const t = fillTarget(); if (!t) return;
   t.border = t.border === false; // toggle: border is on unless explicitly false
-  shapeNoBorder.classList.toggle('off', t.border === false);
+  const noBorder = t.border === false;
+  shapeNoBorder.classList.toggle('active', noBorder);
+  shapeNoBorder.classList.toggle('off', noBorder);
+  shapeNoBorder.title = noBorder ? 'Border off — tap to show border' : 'No border';
   redraw(); saveState();
 });
 function stepOutline(d) {
@@ -3364,15 +3392,15 @@ function stepOutline(d) {
   setSize(t.size + d); // setSize syncs the shape, the global size and the slider
   renderOutlineSize();
 }
-holdRepeat(outlineMinus, () => stepOutline(-2));
-holdRepeat(outlinePlus, () => stepOutline(2));
+if (outlineMinus) holdRepeat(outlineMinus, () => stepOutline(-2));
+if (outlinePlus) holdRepeat(outlinePlus, () => stepOutline(2));
 function updateShapeFillBar() {
   if (!shapeFillBar) return;
   const t = fillTarget();
   shapeFillBar.hidden = !t;
   if (!t) return;
   if (!shapeFillColors.children.length) {
-    for (const c of COLORS) {
+    for (const c of SHAPE_FILL_PRESETS) {
       const b = document.createElement('button');
       b.className = 'fdot'; b.style.background = c; b.title = 'Fill ' + c; b.dataset.c = c;
       b.addEventListener('click', (e) => {
@@ -3389,7 +3417,7 @@ function updateShapeFillBar() {
   shapeFillPattern.innerHTML = FILLSTYLE_ICONS[t.fillStyle] || FILLSTYLE_ICONS.solid;
   shapeFillPattern.title = 'Fill style: ' + (t.fillStyle || 'solid');
   if (!shapeOutlineColors.children.length) {
-    for (const c of COLORS) {
+    for (const c of SHAPE_OUTLINE_PRESETS) {
       const b = document.createElement('button');
       b.className = 'fdot'; b.style.background = c; b.title = 'Outline ' + c; b.dataset.c = c;
       b.addEventListener('click', (e) => {
@@ -3403,12 +3431,23 @@ function updateShapeFillBar() {
   }
   renderOutlineColor();
   renderOutlineSize();
-  shapeNoBorder.classList.toggle('off', t.border === false);
-  shapeNoBorder.title = t.border === false ? 'Border off — tap to show border' : 'No border';
+  const noBorder = t.border === false;
+  shapeNoBorder.classList.toggle('active', noBorder);
+  shapeNoBorder.classList.toggle('off', noBorder);
+  shapeNoBorder.title = noBorder ? 'Border off — tap to show border' : 'No border';
   const b = rotAABB(t);
   const bx = b.x0 * zoom + view.x, bwpx = (b.x1 - b.x0) * zoom;
-  shapeFillBar.style.left = Math.max(8, Math.min(Math.max(8, W - 660), bx + bwpx / 2 - 320)) + 'px';
-  shapeFillBar.style.top = Math.max(8, b.y1 * zoom + view.y + 10) + 'px';
+  const barW = shapeFillBar.offsetWidth || 230;
+  const barH = shapeFillBar.offsetHeight || 72;
+  const targetX = bx + bwpx / 2 - barW / 2;
+  const clampedX = Math.max(8, Math.min(W - barW - 8, targetX));
+  shapeFillBar.style.left = clampedX + 'px';
+
+  let targetY = b.y1 * zoom + view.y + 10;
+  if (targetY + barH > H - 10) {
+    targetY = (b.y0 * zoom + view.y) - barH - 10;
+  }
+  shapeFillBar.style.top = Math.max(8, Math.min(H - barH - 8, targetY)) + 'px';
 }
 renderFill();
 
