@@ -172,13 +172,13 @@ const description = "Free online paint app and collaborative digital whiteboard.
     #colorPop .sw:hover { transform: scale(1.12); }
     #colorPop .sw.active { outline: 3px solid var(--accent); }
     #colorPop .sw.rainbow { background: conic-gradient(#ef4444,#facc15,#22c55e,#3b82f6,#8b5cf6,#ef4444); }
-    #colorPop .opwrap {
+    #colorPop .opwrap, #fillStylePop .opwrap, #bucketPop .opwrap {
       grid-column: 1 / -1; display: flex; align-items: center; gap: 6px;
-      padding-top: 4px;
+      padding-top: 6px; border-top: 1px dashed #e2dcfa; margin-top: 2px;
     }
-    #colorPop .opwrap span { font-size: 11px; font-weight: 700; color: #8888a0; white-space: nowrap; }
-    #colorPop .opwrap input[type="range"] { flex: 1; accent-color: var(--accent); cursor: pointer; }
-    #colorPop .opval { font-size: 11px; font-weight: 700; color: #55556a; min-width: 34px; text-align: right; }
+    #colorPop .opwrap span, #fillStylePop .opwrap span, #bucketPop .opwrap span { font-size: 11px; font-weight: 700; color: #8888a0; white-space: nowrap; }
+    #colorPop .opwrap input[type="range"], #fillStylePop .opwrap input[type="range"], #bucketPop .opwrap input[type="range"] { flex: 1; accent-color: var(--accent); cursor: pointer; }
+    #colorPop .opval, #fillStylePop .opval, #bucketPop .opval { font-size: 11px; font-weight: 700; color: #55556a; min-width: 34px; text-align: right; }
     /* paper color/pattern button floating at the canvas top-right */
     #paperBtn {
       position: absolute; top: 10px; right: 174px; z-index: 15;
@@ -250,7 +250,19 @@ const description = "Free online paint app and collaborative digital whiteboard.
       color: #787399; min-width: 36px; flex-shrink: 0;
     }
     #shapeFillColors, #shapeOutlineColors { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
-    #outlineSize { width: 50px; height: 6px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+    .sbar-op {
+      display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0;
+      padding: 0 4px; height: 26px; border-radius: 8px; background: #f7f6fc;
+      border: 1px solid #e3dcff; box-sizing: border-box;
+    }
+    .sbar-op-icon { width: 12px; height: 12px; flex-shrink: 0; display: block; opacity: .75; }
+    .sbar-op input[type="range"] {
+      width: 44px; height: 5px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0;
+    }
+    .sbar-op-val {
+      font-size: 9px; font-weight: 800; color: #787399; min-width: 25px; text-align: right; flex-shrink: 0;
+    }
+    #outlineSize { width: 44px; height: 6px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
     .step-tiny {
       width: 18px; height: 18px; border-radius: 5px; border: 1px solid #dcd7f5;
       background: #f7f6fc; cursor: pointer; padding: 0;
@@ -662,14 +674,18 @@ const description = "Free online paint app and collaborative digital whiteboard.
         overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
       }
       #shapeFillBar { padding: 5px 6px; gap: 4px; }
-      .sbar-row { gap: 4px; }
-      .sbar-label { min-width: 32px; font-size: 9px; }
-      .fdot { width: 19px; height: 19px; }
-      #shapeFillBar button.mini { width: 25px; height: 25px; }
-      #shapeFillBar button.mini.rainbow { width: 19px; height: 19px; }
-      #outlineSize { width: 38px; }
-      .step-tiny { width: 16px; height: 16px; }
-      .step-tiny svg { width: 9px; height: 9px; }
+      .sbar-row { gap: 3px; }
+      .sbar-label { min-width: 28px; font-size: 9px; }
+      .fdot { width: 18px; height: 18px; }
+      #shapeFillBar button.mini { width: 24px; height: 24px; }
+      #shapeFillBar button.mini.rainbow { width: 18px; height: 18px; }
+      .sbar-op { height: 22px; padding: 0 3px; gap: 2px; }
+      .sbar-op input[type="range"] { width: 32px; }
+      .sbar-op-val { font-size: 8px; min-width: 20px; }
+      .sbar-op-icon { width: 10px; height: 10px; }
+      #outlineSize { width: 32px; }
+      .step-tiny { width: 15px; height: 15px; }
+      .step-tiny svg { width: 8px; height: 8px; }
       .cbBox { width: calc(100vw - 24px); }
     }
     /* short screens: shrink so the whole toolbar still fits without scrolling */
@@ -869,6 +885,11 @@ const description = "Free online paint app and collaborative digital whiteboard.
         <span class="sbar-label">Fill</span>
         <div id="shapeFillColors"></div>
         <button class="mini rainbow" id="shapeFillCustomBtn" title="Custom fill color"></button>
+        <div class="sbar-op" title="Fill opacity">
+          <svg viewBox="0 0 24 24" class="sbar-op-icon"><circle cx="12" cy="12" r="9" fill="none" stroke="#2b2b3a" stroke-width="2.2"/><path d="M12 3 A9 9 0 0 1 12 21 Z" fill="#2b2b3a"/></svg>
+          <input type="range" id="shapeFillOpacity" min="10" max="100" value="100" title="Fill opacity" aria-label="Fill opacity" />
+          <span class="sbar-op-val" id="shapeFillOpacityVal">100%</span>
+        </div>
         <button class="mini" id="shapeFillNoFill" title="No fill"></button>
         <button class="mini" id="shapeFillPattern" title="Fill style"></button>
       </div>
@@ -876,6 +897,11 @@ const description = "Free online paint app and collaborative digital whiteboard.
         <span class="sbar-label">Outline</span>
         <div id="shapeOutlineColors"></div>
         <button class="mini rainbow" id="shapeOutlineCustomBtn" title="Custom outline color"></button>
+        <div class="sbar-op" title="Outline opacity">
+          <svg viewBox="0 0 24 24" class="sbar-op-icon"><circle cx="12" cy="12" r="9" fill="none" stroke="#2b2b3a" stroke-width="2.2"/><path d="M12 3 A9 9 0 0 1 12 21 Z" fill="#2b2b3a"/></svg>
+          <input type="range" id="shapeOutlineOpacity" min="10" max="100" value="100" title="Outline opacity" aria-label="Outline opacity" />
+          <span class="sbar-op-val" id="shapeOutlineOpacityVal">100%</span>
+        </div>
         <button class="step-tiny" id="outlineMinus" title="Thinner outline">
           <svg viewBox="0 0 12 12"><path d="M2.5 6h7" stroke="#2b2b3a" stroke-width="1.8" stroke-linecap="round"/></svg>
         </button>
@@ -934,6 +960,8 @@ let fillShapes = true;
 let fillColor = '#ffd93d';
 let fillStyle = 'solid';      // solid | dots | hatch | grid | zigzag | waves | checker | stars | hearts
 let bucketPattern = 'solid';  // solid | dots | hatch | grid | zigzag | waves | checker | stars | hearts
+let fillOpacity = 1;          // 0.1 - 1 fill opacity for shapes
+let outlineOpacity = 1;       // 0.1 - 1 outline opacity for shapes
 let shapeKind = 'circle';     // circle | rect | triangle | star | heart
 let stickerId = 'star';
 let stickerMode = 'vector';   // vector | outline | emoji — what the sticker tool stamps
@@ -1010,6 +1038,7 @@ function saveState() {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify({
       v: 3, bg, bgPattern, showA4, color, size, opacity, dash, fillColor, fillStyle, fillShapes, bucketPattern,
+      fillOpacity, outlineOpacity,
       shapeKind, stickerId, stickerMode, outlineId, emojiChar, brushType, textFont, textBg, view, zoom,
       toolbarCollapsed: toolbar.classList.contains('collapsed'),
       toolbarPos,
@@ -1029,6 +1058,8 @@ if (saved) {
   dash = saved.dash || dash;
   fillColor = saved.fillColor || fillColor; fillStyle = saved.fillStyle || fillStyle;
   if (saved.bucketPattern) bucketPattern = saved.bucketPattern;
+  if (saved.fillOpacity !== undefined) fillOpacity = Math.max(0.1, Math.min(1, saved.fillOpacity));
+  if (saved.outlineOpacity !== undefined) outlineOpacity = Math.max(0.1, Math.min(1, saved.outlineOpacity));
   fillShapes = saved.fillShapes !== false;
   shapeKind = saved.shapeKind || shapeKind; stickerId = saved.stickerId || stickerId;
   stickerMode = saved.stickerMode || stickerMode; outlineId = saved.outlineId || outlineId;
@@ -1700,6 +1731,8 @@ function drawShape(c, it) {
   shapePath(c, it.kind, it.x0, it.y0, it.x1, it.y1);
   if (it.kind === 'line') {
     c.save();
+    const oa = it.outlineOpacity !== undefined ? it.outlineOpacity : 1;
+    if (oa < 1) c.globalAlpha *= oa;
     c.strokeStyle = it.color; c.lineWidth = it.size; c.lineCap = 'round';
     applyDash(c, it.size, it.dash || 'solid');
     c.stroke();
@@ -1707,13 +1740,19 @@ function drawShape(c, it) {
     return;
   }
   if (it.fill) {
+    c.save();
+    const fa = it.fillOpacity !== undefined ? it.fillOpacity : 1;
+    if (fa < 1) c.globalAlpha *= fa;
     const col = it.fillColor || fillColor || '#ffd93d';
     if (it.fillStyle && it.fillStyle !== 'solid') c.fillStyle = fillPattern(c, it.fillStyle, col);
     else c.fillStyle = col;
     c.fill();
+    c.restore();
   }
   if (it.border !== false) { // the border stays visible even when the shape is filled
     c.save();
+    const oa = it.outlineOpacity !== undefined ? it.outlineOpacity : 1;
+    if (oa < 1) c.globalAlpha *= oa;
     c.strokeStyle = it.color; c.lineWidth = Math.max(2, it.size * 0.6);
     c.lineJoin = 'round'; c.lineCap = 'round';
     applyDash(c, it.size, it.dash || 'solid');
@@ -1728,6 +1767,8 @@ function drawArrow(c, it) {
   const headLen = Math.max(14, it.size * 2.2);
   const hx = x1 - headLen * Math.cos(ang), hy = y1 - headLen * Math.sin(ang);
   c.save();
+  const oa = it.outlineOpacity !== undefined ? it.outlineOpacity : 1;
+  if (oa < 1) c.globalAlpha *= oa;
   c.strokeStyle = it.color; c.fillStyle = it.color;
   c.lineWidth = it.size; c.lineCap = 'round'; c.lineJoin = 'round';
   applyDash(c, it.size, it.dash || 'solid');
@@ -2668,6 +2709,7 @@ canvas.addEventListener('pointerdown', (e) => {
     preview = {
       type: 'shape', kind: shapeKind, x0: p.x, y0: p.y, x1: p.x, y1: p.y,
       color, size, dash, fill: fillShapes, fillColor, fillStyle, alpha: opacity,
+      fillOpacity, outlineOpacity,
     };
     return;
   }
@@ -2676,6 +2718,7 @@ canvas.addEventListener('pointerdown', (e) => {
     preview = {
       type: 'shape', kind, x0: p.x, y0: p.y, x1: p.x, y1: p.y,
       color, size, dash, fill: fillShapes, fillColor, fillStyle, alpha: opacity,
+      fillOpacity, outlineOpacity,
     };
     return;
   }
@@ -3251,6 +3294,22 @@ function buildPops() {
     };
     fillStylePop.appendChild(b);
   }
+  const curFillOp = (pendingShape && pendingShape.fillOpacity !== undefined)
+    ? pendingShape.fillOpacity
+    : ((selected && selected.fillOpacity !== undefined) ? selected.fillOpacity : fillOpacity);
+  const curPct = Math.round(curFillOp * 100);
+  const ow = document.createElement('div');
+  ow.className = 'opwrap';
+  ow.innerHTML = `<span>Opacity</span><input id="patternOpacity" type="range" min="10" max="100" value="${curPct}" aria-label="Pattern opacity" title="Pattern opacity: ${curPct}%" /><span id="patternOpacityVal" class="opval">${curPct}%</span>`;
+  const pos = ow.querySelector('#patternOpacity');
+  const pov = ow.querySelector('#patternOpacityVal');
+  pos.oninput = (e) => {
+    e.stopPropagation();
+    const val = +pos.value;
+    pov.textContent = val + '%';
+    setShapeFillOpacity(val);
+  };
+  fillStylePop.appendChild(ow);
   exportPop.innerHTML = '';
   const pngB = document.createElement('button');
   pngB.innerHTML = '<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5" fill="#D6EBFF" stroke="#2b2b3a" stroke-width="2"/><circle cx="9" cy="10" r="2" fill="#FF6B9D"/><path d="M4.5 16.5l4.3-3.4 3.4 2.6 2.8-2.1 4.5 3" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>PNG picture</span>';
@@ -3340,14 +3399,23 @@ function togglePop(pop, btn) {
     if (btn) { // anchor the popover next to its button
       const r = btn.getBoundingClientRect();
       const w = pop.offsetWidth, h = pop.offsetHeight;
-      if (window.innerWidth <= 760 && btn.id !== 'paperBtn') { // phone left rail: open right of the button
+      if (btn.id === 'shapeFillPattern') {
+        let px = Math.round(r.left + r.width / 2 - w / 2);
+        px = Math.max(8, Math.min(window.innerWidth - w - 8, px));
+        let py = Math.round(r.bottom + 8);
+        if (py + h > window.innerHeight - 8) {
+          py = Math.max(8, Math.round(r.top - h - 8));
+        }
+        pop.style.left = px + 'px';
+        pop.style.top = py + 'px';
+      } else if (window.innerWidth <= 760 && btn.id !== 'paperBtn') { // phone left rail: open right of the button
         pop.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, Math.round(r.right + 8))) + 'px';
         pop.style.top = Math.max(8, Math.min(window.innerHeight - h - 8, Math.round(r.top - 4))) + 'px';
       } else if (btn.id === 'paperBtn') { // top-right button: open below-left so it stays on screen
         pop.style.left = Math.max(8, Math.round(r.left - w - 8)) + 'px';
         pop.style.top = Math.max(8, Math.min(window.innerHeight - h - 8, Math.round(r.bottom + 8))) + 'px';
       } else {
-        pop.style.left = Math.round(r.right + 8) + 'px';
+        pop.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, Math.round(r.right + 8))) + 'px';
         pop.style.top = Math.max(8, Math.min(window.innerHeight - h - 8, Math.round(r.top - 4))) + 'px';
       }
     }
@@ -3502,10 +3570,36 @@ const shapeFillColors = document.getElementById('shapeFillColors');
 const shapeFillNoFill = document.getElementById('shapeFillNoFill');
 const shapeFillCustomBtn = document.getElementById('shapeFillCustomBtn');
 const shapeFillCustom = document.getElementById('shapeFillCustom');
+const shapeFillOpacity = document.getElementById('shapeFillOpacity');
+const shapeFillOpacityVal = document.getElementById('shapeFillOpacityVal');
 function fillTarget() {
   if (pendingShape && pendingShape.type === 'shape') return pendingShape;
   if (tool === 'select' && selected && selected.type === 'shape') return selected;
   return null;
+}
+function setShapeFillOpacity(val) {
+  fillOpacity = Math.max(0.1, Math.min(1, val / 100));
+  const pct = Math.round(fillOpacity * 100) + '%';
+  if (shapeFillOpacity) shapeFillOpacity.value = String(Math.round(fillOpacity * 100));
+  if (shapeFillOpacityVal) shapeFillOpacityVal.textContent = pct;
+  const patSlider = document.getElementById('patternOpacity');
+  const patVal = document.getElementById('patternOpacityVal');
+  if (patSlider) patSlider.value = String(Math.round(fillOpacity * 100));
+  if (patVal) patVal.textContent = pct;
+  const t = fillTarget();
+  if (t) {
+    t.fillOpacity = fillOpacity;
+    t.fill = true;
+    fillShapes = true;
+    renderFill();
+  }
+  redraw();
+  saveState();
+}
+if (shapeFillOpacity) {
+  shapeFillOpacity.value = String(Math.round(fillOpacity * 100));
+  if (shapeFillOpacityVal) shapeFillOpacityVal.textContent = Math.round(fillOpacity * 100) + '%';
+  shapeFillOpacity.addEventListener('input', () => setShapeFillOpacity(+shapeFillOpacity.value));
 }
 shapeFillPattern.addEventListener('click', (e) => { e.stopPropagation(); togglePop(fillStylePop, shapeFillPattern); });
 shapeFillNoFill.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#2b2b3a" stroke-width="2"/><line x1="6.5" y1="17.5" x2="17.5" y2="6.5" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round"/></svg>';
@@ -3544,9 +3638,29 @@ function renderFill() {
 const shapeOutlineColors = document.getElementById('shapeOutlineColors');
 const shapeOutlineCustomBtn = document.getElementById('shapeOutlineCustomBtn');
 const shapeOutlineCustom = document.getElementById('shapeOutlineCustom');
+const shapeOutlineOpacity = document.getElementById('shapeOutlineOpacity');
+const shapeOutlineOpacityVal = document.getElementById('shapeOutlineOpacityVal');
 const outlineMinus = document.getElementById('outlineMinus');
 const outlinePlus = document.getElementById('outlinePlus');
 const outlineSize = document.getElementById('outlineSize');
+
+function setShapeOutlineOpacity(val) {
+  outlineOpacity = Math.max(0.1, Math.min(1, val / 100));
+  const pct = Math.round(outlineOpacity * 100) + '%';
+  if (shapeOutlineOpacity) shapeOutlineOpacity.value = String(Math.round(outlineOpacity * 100));
+  if (shapeOutlineOpacityVal) shapeOutlineOpacityVal.textContent = pct;
+  const t = fillTarget();
+  if (t) {
+    t.outlineOpacity = outlineOpacity;
+  }
+  redraw();
+  saveState();
+}
+if (shapeOutlineOpacity) {
+  shapeOutlineOpacity.value = String(Math.round(outlineOpacity * 100));
+  if (shapeOutlineOpacityVal) shapeOutlineOpacityVal.textContent = Math.round(outlineOpacity * 100) + '%';
+  shapeOutlineOpacity.addEventListener('input', () => setShapeOutlineOpacity(+shapeOutlineOpacity.value));
+}
 shapeOutlineCustomBtn.addEventListener('click', (e) => { e.stopPropagation(); shapeOutlineCustom.click(); });
 shapeOutlineCustom.addEventListener('input', () => {
   const t = fillTarget(); if (!t) return;
@@ -3616,6 +3730,15 @@ function updateShapeFillBar() {
   const curFillCol = t.fillColor || fillColor || '#facc15';
   shapeFillPattern.innerHTML = renderFillIcon(t.fillStyle || 'solid', curFillCol);
   shapeFillPattern.title = 'Fill style: ' + (t.fillStyle || 'solid');
+
+  const curFillOp = t.fillOpacity !== undefined ? t.fillOpacity : fillOpacity;
+  if (shapeFillOpacity) shapeFillOpacity.value = String(Math.round(curFillOp * 100));
+  if (shapeFillOpacityVal) shapeFillOpacityVal.textContent = Math.round(curFillOp * 100) + '%';
+  const patSlider = document.getElementById('patternOpacity');
+  const patVal = document.getElementById('patternOpacityVal');
+  if (patSlider) patSlider.value = String(Math.round(curFillOp * 100));
+  if (patVal) patVal.textContent = Math.round(curFillOp * 100) + '%';
+
   if (!shapeOutlineColors.children.length) {
     for (const c of SHAPE_OUTLINE_PRESETS) {
       const b = document.createElement('button');
@@ -3631,6 +3754,11 @@ function updateShapeFillBar() {
   }
   renderOutlineColor();
   renderOutlineSize();
+
+  const curOutOp = t.outlineOpacity !== undefined ? t.outlineOpacity : outlineOpacity;
+  if (shapeOutlineOpacity) shapeOutlineOpacity.value = String(Math.round(curOutOp * 100));
+  if (shapeOutlineOpacityVal) shapeOutlineOpacityVal.textContent = Math.round(curOutOp * 100) + '%';
+
   const noBorder = t.border === false;
   shapeNoBorder.classList.toggle('active', noBorder);
   shapeNoBorder.classList.toggle('off', noBorder);
@@ -4809,6 +4937,7 @@ function setupDrawOverlay() {
       return {
         type: 'shape', kind, x0: op.x0, y0: op.y0, x1: op.x1, y1: op.y1,
         color, size, dash, fill: fillShapes, fillColor, fillStyle, alpha: opacity,
+        fillOpacity, outlineOpacity,
       };
     }
     if (t === 'sticker') {
