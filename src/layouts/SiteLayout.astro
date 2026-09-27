@@ -1,6 +1,7 @@
 ---
 /* Shared page shell for coPaint: doctype, head (meta, title, favicon, SEO) and body slot. */
 import { SITE_URL } from '../config';
+import ElephantPeek from '../components/ElephantPeek.astro';
 
 interface Props {
   title?: string;
@@ -91,5 +92,6 @@ const fullCanonical = canonical.startsWith("http") ? canonical : `${siteUrl}${ca
 </head>
 <body>
   <slot />
+  <ElephantPeek />
 </body>
 </html>

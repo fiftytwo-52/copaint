@@ -75,6 +75,9 @@ const description = "Free online paint app and collaborative digital whiteboard.
     .group .wide { grid-column: 1 / -1; width: 100%; }
     #clear { background: #fff; }
     #clear:hover { background: #fef2f2; border-color: #e5c0c0; transform: none; }
+    #fullscreenBtn { background: #fff; }
+    #fullscreenBtn:hover { border-color: #2b2b3a; background: #f7f7fa; }
+    #fullscreenBtn.active { background: #eef0f4; border-color: #2b2b3a; }
     button.tool, button.act {
       width: 40px; height: 40px;
       border: 1.5px solid #e7e4f0; border-radius: 12px;
@@ -698,8 +701,12 @@ const description = "Free online paint app and collaborative digital whiteboard.
       <button class="act" id="redo" title="Redo">
         <svg viewBox="0 0 24 24"><path d="M15.5 5.5L20 10l-4.5 4.5" fill="none" stroke="#2b2b3a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.5 10H10a6 6 0 00-6 6v3" fill="none" stroke="#2b2b3a" stroke-width="2.4" stroke-linecap="round"/></svg>
       </button>
-      <button class="act wide" id="clear" title="Clear everything">
+      <button class="act" id="clear" title="Clear everything">
         <svg viewBox="0 0 24 24"><path d="M3 6h18" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="10" x2="10" y1="11" y2="17" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round"/><line x1="14" x2="14" y1="11" y2="17" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="act" id="fullscreenBtn" title="Full screen (F11)">
+        <svg id="fsEnterIcon" viewBox="0 0 24 24"><path d="M3 9V5a2 2 0 0 1 2-2h4M15 3h4a2 2 0 0 1 2 2v4M21 15v4a2 2 0 0 1-2 2h-4M9 21H5a2 2 0 0 1-2-2v-4" fill="none" stroke="#2b2b3a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg id="fsExitIcon" viewBox="0 0 24 24" style="display:none;"><path d="M9 3v4a2 2 0 0 1-2 2H3M15 3v4a2 2 0 0 0 2 2h4M9 21v-4a2 2 0 0 0-2-2H3M15 21v-4a2 2 0 0 1 2-2h4" fill="none" stroke="#2b2b3a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
     </div>
 
@@ -1301,7 +1308,19 @@ const FILLSTYLE_ICONS = new Proxy({}, {
 });
 
 /* ---------------- canvas sizing ---------------- */
+let canvasRect = null;
+function getCanvasRect() {
+  if (!canvasRect) canvasRect = canvas.getBoundingClientRect();
+  return canvasRect;
+}
+function invalidateCanvasRect() {
+  canvasRect = null;
+}
+window.addEventListener('scroll', invalidateCanvasRect, { passive: true });
+window.addEventListener('resize', invalidateCanvasRect, { passive: true });
+
 function resize() {
+  invalidateCanvasRect();
   const r = stage.getBoundingClientRect();
   dpr = Math.max(1, window.devicePixelRatio || 1);
   W = Math.max(1, r.width); H = Math.max(1, r.height);
@@ -2039,6 +2058,16 @@ function repaintPaperBehind(g, x0, y0, w, h) {
   paintPaper(g, x0, y0, w, h);
   g.restore();
 }
+let redrawPending = false;
+function scheduleRedraw() {
+  if (redrawPending) return;
+  redrawPending = true;
+  requestAnimationFrame(() => {
+    redrawPending = false;
+    redraw();
+  });
+}
+
 function redraw() {
   ctx.setTransform(dpr * zoom, 0, 0, dpr * zoom, view.x * dpr, view.y * dpr);
   paintPaper(ctx, -view.x / zoom, -view.y / zoom, W / zoom, H / zoom);
@@ -2048,14 +2077,19 @@ function redraw() {
   if (preview) drawItem(ctx, preview);
   if (pendingShape) drawItem(ctx, pendingShape);
   if (pendingText) drawItem(ctx, pendingText);
-  repaintPaperBehind(ctx, -view.x / zoom, -view.y / zoom, W / zoom, H / zoom);
+  const hasErased = (drawing && drawing.tool === 'eraser') || items.some(it => it.tool === 'eraser' || it.type === 'erase');
+  if (hasErased) {
+    repaintPaperBehind(ctx, -view.x / zoom, -view.y / zoom, W / zoom, H / zoom);
+  }
   if (selected) drawSelection();
   if (areaSel) drawAreaMarquee();
   if (showA4) drawA4();
   drawEraserPreview();
-  updateSelBar();
-  updateAreaBar();
-  updateShapeFillBar();
+  if (!drawing) {
+    updateSelBar();
+    updateAreaBar();
+    updateShapeFillBar();
+  }
 }
 
 /* ---------------- floating selection toolbar ---------------- */
@@ -2579,7 +2613,7 @@ function shiftItem(it, dx, dy) {
 
 /* ---------------- pointer handling ---------------- */
 function pos(e) { // world coords
-  const r = canvas.getBoundingClientRect();
+  const r = getCanvasRect();
   return { x: (e.clientX - r.left - view.x) / zoom, y: (e.clientY - r.top - view.y) / zoom };
 }
 function commit(it) {
@@ -2751,16 +2785,16 @@ canvas.addEventListener('pointerleave', () => {
 canvas.addEventListener('pointermove', (e) => {
   const p = pos(e);
   if (isDrawTool()) { // track pointer so size circle follows pencil, brush, highlighter, eraser
-    const r = canvas.getBoundingClientRect();
+    const r = getCanvasRect();
     const nx = e.clientX - r.left, ny = e.clientY - r.top;
-    if (!eraserHover || Math.abs(eraserHover.x - nx) > 0.5 || Math.abs(eraserHover.y - ny) > 0.5) {
+    if (!eraserHover || Math.abs(eraserHover.x - nx) > 1 || Math.abs(eraserHover.y - ny) > 1) {
       eraserHover = { x: nx, y: ny };
-      if (!drawing) redraw();
+      if (!drawing) scheduleRedraw();
     }
     canvas.style.cursor = 'none';
   } else if (eraserHover) {
     eraserHover = null;
-    redraw();
+    scheduleRedraw();
   }
   if (!drag && !areaDrag && !drawing && !preview && (tool === 'select' || tool === 'text' || tool === 'shape' || tool === 'sticker')) {
     const rh = hitResizeHandle(e);
@@ -2780,7 +2814,7 @@ canvas.addEventListener('pointermove', (e) => {
     if (Math.abs(rot - sn) < 0.09) rot = sn;
     selected.rot = rot;
     drag.moved = true;
-    redraw();
+    scheduleRedraw();
     return;
   }
   if (drag && drag.mode === 'resize' && selected) {
@@ -2828,7 +2862,7 @@ canvas.addEventListener('pointermove', (e) => {
       selected.s = Math.max(8, Math.min(600, drag.s0 * d / drag.d0));
     }
     drag.moved = true;
-    redraw();
+    scheduleRedraw();
     return;
   }
   if (drag && drag.mode === 'pan') {
@@ -2836,7 +2870,7 @@ canvas.addEventListener('pointermove', (e) => {
     view.y += e.clientY - drag.sy;
     drag.sx = e.clientX; drag.sy = e.clientY;
     clampView();
-    redraw();
+    scheduleRedraw();
     return;
   }
   if (drag && drag.mode === 'move' && selected) {
@@ -2844,7 +2878,7 @@ canvas.addEventListener('pointermove', (e) => {
     if (dx || dy) {
       shiftItem(selected, dx, dy);
       drag.lx = p.x; drag.ly = p.y; drag.moved = true;
-      redraw();
+      scheduleRedraw();
     }
     return;
   }
@@ -2855,14 +2889,22 @@ canvas.addEventListener('pointermove', (e) => {
     };
     areaSel.w = areaSel.x1 - areaSel.x0;
     areaSel.h = areaSel.y1 - areaSel.y0;
-    redraw();
+    scheduleRedraw();
     return;
   }
   if (drawing) {
-    const pts = drawing.points, last = pts[pts.length - 1];
-    if (Math.hypot(p.x - last.x, p.y - last.y) < 2) return;
-    pts.push(p);
-    redraw();
+    const evts = (typeof e.getCoalescedEvents === 'function') ? e.getCoalescedEvents() : [e];
+    const pts = drawing.points;
+    let added = false;
+    for (let i = 0; i < evts.length; i++) {
+      const cp = pos(evts[i]);
+      const last = pts[pts.length - 1];
+      if (Math.hypot(cp.x - last.x, cp.y - last.y) >= 2) {
+        pts.push(cp);
+        added = true;
+      }
+    }
+    if (added) scheduleRedraw();
   } else if (preview) {
     if (preview.type === 'image') { // coloring outline: drag-to-place box
       preview.x = Math.min(preview.ax, p.x);
@@ -2872,7 +2914,7 @@ canvas.addEventListener('pointermove', (e) => {
     } else {
       preview.x1 = p.x; preview.y1 = p.y;
     }
-    redraw();
+    scheduleRedraw();
   }
 });
 
@@ -3024,39 +3066,6 @@ const endGrip = () => { gripDrag = null; };
 textEditGrip.addEventListener('pointerup', endGrip);
 textEditGrip.addEventListener('pointercancel', endGrip);
 
-/* ---------------- image insert ---------------- */
-const imagePicker = document.getElementById('imagePicker');
-imagePicker.addEventListener('change', () => {
-  const file = imagePicker.files && imagePicker.files[0];
-  imagePicker.value = '';
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    const img = new Image();
-    img.onload = () => {
-      const maxDim = 720;
-      const k = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
-      const w = Math.round(img.naturalWidth * k), h = Math.round(img.naturalHeight * k);
-      const t = document.createElement('canvas');
-      t.width = w; t.height = h;
-      t.getContext('2d').drawImage(img, 0, 0, w, h);
-      const src = t.toDataURL('image/jpeg', 0.85);
-      const it = {
-        type: 'image', src,
-        x: (-view.x + W / 2) / zoom - w / 2, y: (-view.y + H / 2) / zoom - h / 2,
-        w, h,
-      };
-      commit(it);
-      setTool('select');
-      selected = it;
-      redraw();
-      toast('Picture added — drag it to move');
-    };
-    img.src = reader.result;
-  };
-  reader.readAsDataURL(file);
-});
-
 /* ---------------- toast ---------------- */
 const toastEl = document.getElementById('toast');
 let toastTimer = null;
@@ -3066,6 +3075,215 @@ function toast(msg) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1600);
 }
+
+/* ---------------- image insert & paste ---------------- */
+function insertImageFromSource(img, formatHint) {
+  if (!img || !img.naturalWidth || !img.naturalHeight) {
+    toast('Unsupported image');
+    return;
+  }
+  const maxDim = 720;
+  const k = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
+  const w = Math.round(img.naturalWidth * k), h = Math.round(img.naturalHeight * k);
+  if (!w || !h) {
+    toast('Unsupported image');
+    return;
+  }
+  const t = document.createElement('canvas');
+  t.width = w; t.height = h;
+  const tCtx = t.getContext('2d');
+  tCtx.drawImage(img, 0, 0, w, h);
+
+  let src;
+  try {
+    let hasAlpha = false;
+    const isPotentiallyTransparent = !formatHint || /png|webp|svg|gif/i.test(formatHint);
+    if (isPotentiallyTransparent) {
+      const imgData = tCtx.getImageData(0, 0, w, h).data;
+      const step = Math.max(1, Math.floor(imgData.length / (4 * 10000))) * 4;
+      for (let i = 3; i < imgData.length; i += step) {
+        if (imgData[i] < 250) {
+          hasAlpha = true;
+          break;
+        }
+      }
+    }
+    src = hasAlpha ? t.toDataURL('image/png') : t.toDataURL('image/jpeg', 0.88);
+  } catch {
+    src = img.src;
+  }
+
+  const it = {
+    type: 'image', src,
+    x: (-view.x + W / 2) / zoom - w / 2, y: (-view.y + H / 2) / zoom - h / 2,
+    w, h,
+  };
+  commit(it);
+  setTool('select');
+  selected = it;
+  redraw();
+  toast('Picture added — drag it to move');
+}
+
+function loadImageFromFile(file) {
+  if (!file || !file.type || !file.type.startsWith('image/')) {
+    toast('Unsupported image');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onerror = () => {
+    toast('Unsupported image');
+  };
+  reader.onload = () => {
+    const img = new Image();
+    img.onerror = () => {
+      toast('Unsupported image');
+    };
+    img.onload = () => {
+      insertImageFromSource(img, file.type);
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function loadImageFromUrl(url) {
+  if (!url || typeof url !== 'string') {
+    toast('Unsupported image');
+    return;
+  }
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  let triedWithoutCors = false;
+  img.onerror = () => {
+    if (!triedWithoutCors) {
+      triedWithoutCors = true;
+      const fallbackImg = new Image();
+      fallbackImg.onerror = () => {
+        toast('Unsupported image');
+      };
+      fallbackImg.onload = () => {
+        insertImageFromSource(fallbackImg, 'image/png');
+      };
+      fallbackImg.src = url;
+      return;
+    }
+    toast('Unsupported image');
+  };
+  img.onload = () => {
+    insertImageFromSource(img, 'image/png');
+  };
+  img.src = url;
+}
+
+const imagePicker = document.getElementById('imagePicker');
+imagePicker.addEventListener('change', () => {
+  const file = imagePicker.files && imagePicker.files[0];
+  imagePicker.value = '';
+  if (!file) return;
+  loadImageFromFile(file);
+});
+
+/* paste image from clipboard (e.g. copying from another website or app) */
+document.addEventListener('paste', (e) => {
+  const activeEl = document.activeElement;
+  const isInputFocused = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable);
+  const typing = (textEditWrap && textEditWrap.hidden === false) || isInputFocused;
+
+  const clipboardData = e.clipboardData || window.clipboardData;
+  if (!clipboardData) return;
+
+  const items = clipboardData.items;
+  let imageFile = null;
+  let hasNonImageFile = false;
+
+  if (items && items.length) {
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i];
+      if (it.type && it.type.startsWith('image/')) {
+        imageFile = it.getAsFile();
+        if (imageFile) break;
+      } else if (it.kind === 'file') {
+        hasNonImageFile = true;
+      }
+    }
+  }
+
+  if (!imageFile && clipboardData.files && clipboardData.files.length) {
+    for (let i = 0; i < clipboardData.files.length; i++) {
+      const f = clipboardData.files[i];
+      if (f.type && f.type.startsWith('image/')) {
+        imageFile = f;
+        break;
+      } else {
+        hasNonImageFile = true;
+      }
+    }
+  }
+
+  if (imageFile) {
+    e.preventDefault();
+    loadImageFromFile(imageFile);
+    return;
+  }
+
+  // If a file was in the clipboard but it was not an image (e.g. pdf, doc, mp3)
+  if (hasNonImageFile) {
+    e.preventDefault();
+    toast('Unsupported image');
+    return;
+  }
+
+  // If the user is currently typing in an input field and not pasting an image file, let default paste proceed
+  if (typing) return;
+
+  // Check if clipboard contains an HTML snippet with <img> (copying image element from webpage)
+  const html = clipboardData.getData('text/html');
+  if (html) {
+    try {
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const imgEl = doc.querySelector('img');
+      if (imgEl && imgEl.src) {
+        e.preventDefault();
+        loadImageFromUrl(imgEl.src);
+        return;
+      }
+    } catch {}
+  }
+
+  // Check if clipboard text is an image URL or base64 data URL
+  const text = clipboardData.getData('text/plain')?.trim();
+  if (text) {
+    const isDataImg = text.startsWith('data:image/');
+    const isHttpImg = /^https?:\/\/.+\.(png|jpe?g|webp|gif|svg|bmp|avif)(\?.*)?$/i.test(text);
+    if (isDataImg || isHttpImg) {
+      e.preventDefault();
+      loadImageFromUrl(text);
+      return;
+    }
+    // If user is pasting text while focusing the drawing canvas, show unsupported image notification
+    toast('Unsupported image');
+  }
+});
+
+/* drag & drop images onto the canvas */
+window.addEventListener('dragover', (e) => {
+  if (e.dataTransfer && e.dataTransfer.types && [...e.dataTransfer.types].includes('Files')) {
+    e.preventDefault();
+  }
+});
+window.addEventListener('drop', (e) => {
+  if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+    const file = e.dataTransfer.files[0];
+    if (file.type && file.type.startsWith('image/')) {
+      e.preventDefault();
+      loadImageFromFile(file);
+    } else {
+      e.preventDefault();
+      toast('Unsupported image');
+    }
+  }
+});
 
 /* ---------------- toolbar: tools ---------------- */
 const toolBtns = [...document.querySelectorAll('button.tool')];
@@ -3923,6 +4141,49 @@ document.getElementById('clearYes').onclick = () => {
   toast('Cleared!');
 };
 document.getElementById('clearNo').onclick = () => hidePops();
+
+/* ---------------- full screen ---------------- */
+const fullscreenBtn = document.getElementById('fullscreenBtn');
+function isFullscreen() {
+  return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+}
+function updateFullscreenBtn() {
+  if (!fullscreenBtn) return;
+  const active = isFullscreen();
+  const enterIcon = fullscreenBtn.querySelector('#fsEnterIcon');
+  const exitIcon = fullscreenBtn.querySelector('#fsExitIcon');
+  if (enterIcon) enterIcon.style.display = active ? 'none' : 'block';
+  if (exitIcon) exitIcon.style.display = active ? 'block' : 'none';
+  fullscreenBtn.title = active ? 'Exit full screen (F11)' : 'Full screen (F11)';
+  fullscreenBtn.classList.toggle('active', active);
+}
+if (fullscreenBtn) {
+  fullscreenBtn.onclick = async (e) => {
+    e.stopPropagation();
+    try {
+      if (!isFullscreen()) {
+        const el = document.documentElement;
+        if (el.requestFullscreen) await el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen();
+        else if (el.mozRequestFullScreen) await el.mozRequestFullScreen();
+        else if (el.msRequestFullscreen) await el.msRequestFullscreen();
+      } else {
+        if (document.exitFullscreen) await document.exitFullscreen();
+        else if (document.webkitExitFullscreen) await document.webkitExitFullscreen();
+        else if (document.mozCancelFullScreen) await document.mozCancelFullScreen();
+        else if (document.msExitFullscreen) await document.msExitFullscreen();
+      }
+    } catch {
+      toast('Full screen not available');
+    }
+  };
+}
+['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach((evt) => {
+  document.addEventListener(evt, () => {
+    updateFullscreenBtn();
+    setTimeout(resize, 100);
+  });
+});
 const bgPicker = document.getElementById('bgPicker');
 paperBtn.onclick = (e) => { e.stopPropagation(); togglePop(bgPop, paperBtn); };
 function refreshPaperBtn() {
@@ -4067,6 +4328,11 @@ document.addEventListener('keydown', (e) => {
     return;
   }
   if (typing) return;
+  if (!mod && (e.key.toLowerCase() === 'f' || e.key === 'F11')) {
+    e.preventDefault();
+    if (fullscreenBtn) fullscreenBtn.click();
+    return;
+  }
   /* single-key tool shortcuts */
   const shortcutTool = { p: 'pencil', b: 'brush', h: 'highlighter', e: 'eraser', g: 'bucket', l: 'line', a: 'arrow', s: 'select', m: 'pan', o: 'shape', t: 'text' }[e.key.toLowerCase()];
   if (shortcutTool && !mod) {
