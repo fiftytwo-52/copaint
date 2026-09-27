@@ -932,6 +932,10 @@ let preview = null;           // in-progress shape/line preview
 let selected = null;          // selected item (select tool)
 let drag = null;              // active drag: pan | move
 
+/* sticker & image caches */
+const stickerImgs = {};
+const imageCache = {};
+
 /* ---------------- collab state ---------------- */
 const collab = {
   mode: null, // 'teacher' | 'student' | null
@@ -1228,12 +1232,6 @@ function resize() {
   canvas.height = Math.round(H * dpr);
   redraw();
 }
-new ResizeObserver(resize).observe(stage);
-resize();
-window.addEventListener('pageshow', () => {
-  resize();
-  redraw();
-});
 
 function clampView() {
   view.x = Math.max(-1600, Math.min(1600, view.x));
@@ -1670,7 +1668,6 @@ function drawArrow(c, it) {
 }
 
 /* sticker raster cache (SVG -> Image, data: URLs never taint the canvas) */
-const stickerImgs = {};
 function getStickerImg(id) {
   const st = STICKERS.find(s => s.id === id);
   if (!st) return null;
@@ -1691,7 +1688,6 @@ function drawSticker(c, it) {
 }
 
 /* inserted pictures */
-const imageCache = {};
 function getImage(src) {
   if (!imageCache[src]) {
     const img = new Image();
@@ -2880,6 +2876,13 @@ const colorPop = document.getElementById('colorPop');
 const clearPop = document.getElementById('clearPop');
 const collabPop = document.getElementById('collabPop');
 const collabBtn = document.getElementById('collabBtn');
+const clearBtn = document.getElementById('clear');
+const colorDot = document.getElementById('colorDot');
+const customColorInput = document.getElementById('customColorInput');
+const strokeStyleBtn = document.getElementById('strokeStyleBtn');
+const shapeFillPattern = document.getElementById('shapeFillPattern');
+const paperBtn = document.getElementById('paperBtn');
+const exportBtn = document.getElementById('exportBtn');
 const allPops = [shapePop, stickerPop, brushPop, fontPop, strokePop, fillStylePop, exportPop, bgPop, colorPop, clearPop, collabPop];
 
 const BRUSH_ORDER = ['round', 'marker', 'calligraphy', 'spray', 'crayon', 'neon', 'dots', 'rainbow', 'taper', 'sketch', 'chalk'];
@@ -3118,7 +3121,7 @@ function buildPops() {
 
   buildColorPop();
 }
-function hidePops() { allPops.forEach(p => p.hidden = true); }
+function hidePops() { allPops.forEach(p => { if (p) p.hidden = true; }); }
 function togglePop(pop, btn) {
   const wasHidden = pop.hidden;
   hidePops();
@@ -3172,18 +3175,25 @@ toolBtns.forEach((b) => {
   });
 });
 document.addEventListener('pointerdown', (e) => {
-  const pairs = [[shapePop, shapeBtn], [stickerPop, stickerBtn], [brushPop, brushBtn], [fontPop, textBtn], [strokePop, strokeStyleBtn], [fillStylePop, shapeFillPattern], [exportPop, exportBtn], [bgPop, paperBtn], [colorPop, colorDot], [clearPop, document.getElementById('clear')]];
+  const pairs = [
+    [shapePop, shapeBtn], [stickerPop, stickerBtn], [brushPop, brushBtn],
+    [fontPop, textBtn], [strokePop, strokeStyleBtn], [fillStylePop, shapeFillPattern],
+    [exportPop, exportBtn], [bgPop, paperBtn], [colorPop, colorDot],
+    [clearPop, clearBtn]
+  ];
   for (const [pop, btn] of pairs) {
-    if (!pop.hidden && !pop.contains(e.target) && !btn.contains(e.target)) pop.hidden = true;
+    if (pop && !pop.hidden && !pop.contains(e.target) && (!btn || !btn.contains(e.target))) {
+      pop.hidden = true;
+    }
   }
   // collab popover + dialogs close on outside click too (unless a room flow is mid-dialog)
-  if (collabPop && !collabPop.hidden && !collabPop.contains(e.target) && !collabBtn.contains(e.target) && !collabPop.dataset.lock) collabPop.hidden = true;
+  if (collabPop && !collabPop.hidden && !collabPop.contains(e.target) && (!collabBtn || !collabBtn.contains(e.target)) && !collabPop.dataset.lock) {
+    collabPop.hidden = true;
+  }
 });
 
 /* ---------------- toolbar: color dot, size, line style ---------------- */
 const COLORS = ['#1f2937','#ffffff','#ef4444','#f97316','#facc15','#22c55e','#3b82f6','#8b5cf6','#ec4899','#a16207','#78716c','#0ea5e9'];
-const colorDot = document.getElementById('colorDot');
-const customColorInput = document.getElementById('customColorInput');
 function buildColors() {
   // the single dot always shows the current drawing color
   colorDot.style.background = color;
@@ -3242,7 +3252,6 @@ customColorInput.addEventListener('input', () => {
   buildColors(); buildColorPop(); redraw(); saveState();
 });
 
-const strokeStyleBtn = document.getElementById('strokeStyleBtn');
 function refreshStyleIcons() {
   strokeStyleBtn.innerHTML = DASH_ICONS[dash];
   strokeStyleBtn.title = 'Line style: ' + dash;
@@ -3276,7 +3285,6 @@ holdRepeat(sizePlus, () => setSize(size + 2));
 
 /* ---------------- fill tools: floating bar, only while a shape is selected ---------------- */
 const shapeFillColors = document.getElementById('shapeFillColors');
-const shapeFillPattern = document.getElementById('shapeFillPattern');
 const shapeFillNoFill = document.getElementById('shapeFillNoFill');
 const shapeFillCustomBtn = document.getElementById('shapeFillCustomBtn');
 const shapeFillCustom = document.getElementById('shapeFillCustom');
@@ -3431,7 +3439,6 @@ document.getElementById('clearYes').onclick = () => {
 };
 document.getElementById('clearNo').onclick = () => hidePops();
 const bgPicker = document.getElementById('bgPicker');
-const paperBtn = document.getElementById('paperBtn');
 paperBtn.onclick = (e) => { e.stopPropagation(); togglePop(bgPop, paperBtn); };
 function refreshPaperBtn() {
   const r = paperBtn.querySelector('.ppaper');
@@ -3538,7 +3545,6 @@ function downloadPNG() {
 }
 document.getElementById('download').onclick = downloadPNG;
 
-const exportBtn = document.getElementById('exportBtn');
 exportBtn.onclick = () => togglePop(exportPop, exportBtn);
 
 /* keep only the A4 pages that actually contain artwork (for PDF export) */
@@ -3647,6 +3653,11 @@ setTool('pencil');
 refreshZoomLabel();
 resize();
 redraw();
+new ResizeObserver(resize).observe(stage);
+window.addEventListener('pageshow', () => {
+  resize();
+  redraw();
+});
 
 /* =====================================================================
    CLASSROOM COLLABORATION (SYNC HOOK: realized)
