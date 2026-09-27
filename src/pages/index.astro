@@ -251,7 +251,16 @@ const description = "Free online paint app and collaborative digital whiteboard.
       color: #787399; min-width: 36px; flex-shrink: 0;
     }
     #shapeFillColors, #shapeOutlineColors { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
-    #outlineSize { width: 56px; height: 6px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+    #outlineSize { width: 50px; height: 6px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+    .step-tiny {
+      width: 18px; height: 18px; border-radius: 5px; border: 1px solid #dcd7f5;
+      background: #f7f6fc; cursor: pointer; padding: 0;
+      display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+      color: #2b2b3a; transition: background .12s, border-color .12s, transform .08s;
+    }
+    .step-tiny:hover { background: #ece8fa; border-color: #beb5ec; }
+    .step-tiny:active { transform: scale(0.92); }
+    .step-tiny svg { width: 10px; height: 10px; display: block; }
     .fdot {
       width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff;
       outline: 1.5px solid rgba(0,0,0,.15); cursor: pointer; padding: 0; flex-shrink: 0;
@@ -659,7 +668,9 @@ const description = "Free online paint app and collaborative digital whiteboard.
       .fdot { width: 19px; height: 19px; }
       #shapeFillBar button.mini { width: 25px; height: 25px; }
       #shapeFillBar button.mini.rainbow { width: 19px; height: 19px; }
-      #outlineSize { width: 44px; }
+      #outlineSize { width: 38px; }
+      .step-tiny { width: 16px; height: 16px; }
+      .step-tiny svg { width: 9px; height: 9px; }
       .cbBox { width: calc(100vw - 24px); }
     }
     /* short screens: shrink so the whole toolbar still fits without scrolling */
@@ -865,7 +876,13 @@ const description = "Free online paint app and collaborative digital whiteboard.
         <span class="sbar-label">Outline</span>
         <div id="shapeOutlineColors"></div>
         <button class="mini rainbow" id="shapeOutlineCustomBtn" title="Custom outline color"></button>
+        <button class="step-tiny" id="outlineMinus" title="Thinner outline">
+          <svg viewBox="0 0 12 12"><path d="M2.5 6h7" stroke="#2b2b3a" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
         <input type="range" id="outlineSize" min="2" max="60" value="8" title="Outline thickness" aria-label="Outline thickness" />
+        <button class="step-tiny" id="outlinePlus" title="Thicker outline">
+          <svg viewBox="0 0 12 12"><path d="M6 2.5v7M2.5 6h7" stroke="#2b2b3a" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
         <button class="mini" id="shapeNoBorder" title="No border"></button>
       </div>
     </div>
@@ -2185,7 +2202,7 @@ function drawSelection() {
   ctx.closePath();
   ctx.stroke();
   ctx.setLineDash([]);
-  if (it.type === 'image' || it.type === 'sticker' || it.type === 'text') {
+  if (it.type === 'image' || it.type === 'sticker' || it.type === 'text' || it.type === 'shape') {
     ctx.fillStyle = '#ffffff';
     ctx.strokeStyle = '#3b82f6';
     ctx.lineWidth = 2.5;
@@ -2234,7 +2251,7 @@ function selectionHandles(it) {
   }
   return out;
 }
-/* shared corner-resize start for images, stickers and text */
+/* shared corner-resize start for images, stickers, text and shapes */
 function beginResize(rh, p) {
   const it = selected;
   if (rh === 'rot') {
@@ -2252,6 +2269,32 @@ function beginResize(rh, p) {
       mode: 'resize', handle: rh, moved: false,
       ax: rh[1] === 'w' ? b.x1 : b.x0, // anchor = opposite corner (stays fixed)
       ay: rh[0] === 'n' ? b.y1 : b.y0,
+    };
+  } else if (it.type === 'shape') {
+    const minX = Math.min(it.x0, it.x1);
+    const maxX = Math.max(it.x0, it.x1);
+    const minY = Math.min(it.y0, it.y1);
+    const maxY = Math.max(it.y0, it.y1);
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+    const rot = it.rot || 0;
+    const cos = Math.cos(rot), sin = Math.sin(rot);
+    const toWorld = (lx, ly) => ({
+      x: cx + (lx - cx) * cos - (ly - cy) * sin,
+      y: cy + (lx - cx) * sin + (ly - cy) * cos,
+    });
+    const localAx = rh[1] === 'w' ? maxX : minX;
+    const localAy = rh[0] === 'n' ? maxY : minY;
+    const anchorWorld = toWorld(localAx, localAy);
+    drag = {
+      mode: 'resize', handle: rh, moved: false,
+      pending: it === pendingShape,
+      rot,
+      anchorWorld,
+      dirX: rh[1] === 'w' ? -1 : 1,
+      dirY: rh[0] === 'n' ? -1 : 1,
+      invX: it.x0 > it.x1,
+      invY: it.y0 > it.y1,
     };
   } else { // sticker & text: uniform scale from the center
     const b = itemBounds(it);
@@ -2274,7 +2317,6 @@ function hitResizeHandle(e) {
   const sx = e.clientX - r.left, sy = e.clientY - r.top;
   for (const h of selectionHandles(selected)) {
     if (h.id === 'rot') { if (Math.hypot(sx - h.x, sy - h.y) <= 16) return 'rot'; continue; }
-    if (t === 'shape') continue; // shapes: rotate handle only, no corner resizing
     if (Math.abs(sx - h.x) <= 12 && Math.abs(sy - h.y) <= 12) return h.id;
   }
   return null;
@@ -2533,7 +2575,7 @@ canvas.addEventListener('pointerdown', (e) => {
   if (tool === 'shape') {
     if (pendingShape) {
       const rh0 = hitResizeHandle(e);
-      if (rh0 === 'rot') { beginResize(rh0, p); return; } // rotate the pending shape
+      if (rh0) { beginResize(rh0, p); return; } // resize or rotate the pending shape
       const lp = toLocal(pendingShape, p);
       const b = itemBounds(pendingShape);
       if (lp.x >= b.x0 - 6 && lp.x <= b.x1 + 6 && lp.y >= b.y0 - 6 && lp.y <= b.y1 + 6) {
@@ -2628,6 +2670,27 @@ canvas.addEventListener('pointermove', (e) => {
       if (y1 - y0 < minS) { if (h[0] === 'n') y0 = y1 - minS; else y1 = y0 + minS; }
       selected.x = x0; selected.y = y0;
       selected.w = x1 - x0; selected.h = y1 - y0;
+    } else if (selected.type === 'shape') {
+      const minS = 10;
+      const rot = drag.rot || 0;
+      const cos = Math.cos(rot), sin = Math.sin(rot);
+      const vdx = p.x - drag.anchorWorld.x;
+      const vdy = p.y - drag.anchorWorld.y;
+      const projX = (vdx * cos + vdy * sin) * drag.dirX;
+      const projY = (-vdx * sin + vdy * cos) * drag.dirY;
+      const w = Math.max(minS, projX);
+      const h = Math.max(minS, projY);
+      const localOffX = drag.dirX * (w / 2);
+      const localOffY = drag.dirY * (h / 2);
+      const newCx = drag.anchorWorld.x + localOffX * cos - localOffY * sin;
+      const newCy = drag.anchorWorld.y + localOffX * sin + localOffY * cos;
+      const x0 = newCx - w / 2, x1 = newCx + w / 2;
+      const y0 = newCy - h / 2, y1 = newCy + h / 2;
+      selected.x0 = drag.invX ? x1 : x0;
+      selected.x1 = drag.invX ? x0 : x1;
+      selected.y0 = drag.invY ? y1 : y0;
+      selected.y1 = drag.invY ? y0 : y1;
+      if (typeof updateShapeFillBar === 'function') updateShapeFillBar();
     } else if (selected.type === 'text') { // text: uniform scale of the font size, anchored at the center
       const d = Math.max(8, Math.hypot(lp.x - drag.cx, lp.y - drag.cy));
       selected.s = Math.max(4, Math.min(200, drag.s0 * d / drag.d0));
