@@ -934,6 +934,7 @@ let fillShapes = true;
 let fillColor = '#ffd93d';
 let fillStyle = 'solid';      // solid | dots | hatch | grid | zigzag | waves | checker | stars | hearts
 let bucketPattern = 'solid';  // solid | dots | hatch | grid | zigzag | waves | checker | stars | hearts
+let bucketDensity = 1;        // 0.4 - 2.6 pattern scale & density for bucket fill
 let fillOpacity = 1;          // 0.1 - 1 fill opacity for shapes
 let outlineOpacity = 1;       // 0.1 - 1 outline opacity for shapes
 let shapeKind = 'circle';     // circle | rect | triangle | star | heart
@@ -1011,7 +1012,7 @@ function loadState() {
 function saveState() {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify({
-      v: 3, bg, bgPattern, showA4, color, size, opacity, dash, fillColor, fillStyle, fillShapes, bucketPattern,
+      v: 3, bg, bgPattern, showA4, color, size, opacity, dash, fillColor, fillStyle, fillShapes, bucketPattern, bucketDensity,
       fillOpacity, outlineOpacity,
       shapeKind, stickerId, stickerMode, outlineId, emojiChar, brushType, textFont, textBg, view, zoom,
       toolbarCollapsed: toolbar.classList.contains('collapsed'),
@@ -1032,6 +1033,7 @@ if (saved) {
   dash = saved.dash || dash;
   fillColor = saved.fillColor || fillColor; fillStyle = saved.fillStyle || fillStyle;
   if (saved.bucketPattern) bucketPattern = saved.bucketPattern;
+  if (saved.bucketDensity !== undefined) bucketDensity = Math.max(0.4, Math.min(2.6, saved.bucketDensity));
   if (saved.fillOpacity !== undefined) fillOpacity = Math.max(0.1, Math.min(1, saved.fillOpacity));
   if (saved.outlineOpacity !== undefined) outlineOpacity = Math.max(0.1, Math.min(1, saved.outlineOpacity));
   fillShapes = saved.fillShapes !== false;
@@ -1257,33 +1259,40 @@ const DASH_ICONS = {
   dashed: '<svg viewBox="0 0 40 16"><path d="M4 8h32" stroke="#2b2b3a" stroke-width="4" stroke-linecap="round" stroke-dasharray="8 6"/></svg>',
   dotted: '<svg viewBox="0 0 40 16"><path d="M4 8h32" stroke="#2b2b3a" stroke-width="4" stroke-linecap="round" stroke-dasharray="0.1 8"/></svg>',
 };
-function renderFillIcon(f, col = '#2b6CB0') {
+function renderFillIcon(f, col = '#2b6CB0', scale = 1) {
+  const s = Math.max(0.4, Math.min(2.5, typeof scale === 'number' ? scale : 1));
   if (f === 'solid') {
     return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="${col}" stroke="#2b2b3a" stroke-width="3"/></svg>`;
   }
   if (f === 'hatch') {
-    return `<svg viewBox="0 0 40 40"><defs><clipPath id="kfh"><rect x="7" y="7" width="26" height="26" rx="5"/></clipPath></defs><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g clip-path="url(#kfh)" stroke="${col}" stroke-width="3"><path d="M4 32L32 4M-4 20L20 -4M16 44L44 16"/></g></svg>`;
+    const sw = Math.max(1.4, Math.min(5.5, 3 * s));
+    return `<svg viewBox="0 0 40 40"><defs><clipPath id="kfh"><rect x="7" y="7" width="26" height="26" rx="5"/></clipPath></defs><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g clip-path="url(#kfh)" stroke="${col}" stroke-width="${sw}"><path d="M4 32L32 4M-4 20L20 -4M16 44L44 16M-10 10L10 -10M26 54L54 26"/></g></svg>`;
   }
   if (f === 'dots') {
-    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g fill="${col}"><circle cx="15" cy="15" r="2.6"/><circle cx="25" cy="15" r="2.6"/><circle cx="15" cy="25" r="2.6"/><circle cx="25" cy="25" r="2.6"/></g></svg>`;
+    const r = Math.max(1.2, Math.min(5, 2.6 * s));
+    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g fill="${col}"><circle cx="15" cy="15" r="${r}"/><circle cx="25" cy="15" r="${r}"/><circle cx="15" cy="25" r="${r}"/><circle cx="25" cy="25" r="${r}"/></g></svg>`;
   }
   if (f === 'grid') {
-    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g stroke="${col}" stroke-width="2.5"><path d="M20 7v26M7 20h26"/></g></svg>`;
+    const sw = Math.max(1.4, Math.min(5, 2.5 * s));
+    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g stroke="${col}" stroke-width="${sw}"><path d="M20 7v26M7 20h26"/></g></svg>`;
   }
   if (f === 'zigzag') {
-    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><path d="M9 27 L15 16 L21 27 L27 16 L33 27" fill="none" stroke="${col}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const sw = Math.max(1.4, Math.min(5, 2.5 * s));
+    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><path d="M9 27 L15 16 L21 27 L27 16 L33 27" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   }
   if (f === 'waves') {
-    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><path d="M9 20 q 3 -6 6 0 t 6 0 t 6 0" fill="none" stroke="${col}" stroke-width="2.5" stroke-linecap="round"/></svg>`;
+    const sw = Math.max(1.4, Math.min(5, 2.5 * s));
+    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><path d="M9 20 q 3 -6 6 0 t 6 0 t 6 0" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"/></svg>`;
   }
   if (f === 'checker') {
-    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g fill="${col}"><rect x="14" y="14" width="6" height="6"/><rect x="20" y="20" width="6" height="6"/></g></svg>`;
+    const sz = Math.max(3, Math.min(9, 6 * s));
+    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g fill="${col}"><rect x="14" y="14" width="${sz}" height="${sz}"/><rect x="${14 + sz}" y="${14 + sz}" width="${sz}" height="${sz}"/></g></svg>`;
   }
   if (f === 'stars') {
-    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g fill="${col}"><path d="M16 11 L17.8 14.6 L21.7 15.1 L18.9 17.9 L19.5 21.8 L16 19.8 L12.5 21.8 L13.1 17.9 L10.3 15.1 L14.2 14.6 Z"/><path d="M27 22 L28.2 24.4 L30.8 24.7 L28.9 26.5 L29.4 29 L27 27.7 L24.6 29 L25.1 26.5 L23.2 24.7 L25.8 24.4 Z"/></g></svg>`;
+    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g fill="${col}" transform="translate(20,20) scale(${s}) translate(-20,-20)"><path d="M16 11 L17.8 14.6 L21.7 15.1 L18.9 17.9 L19.5 21.8 L16 19.8 L12.5 21.8 L13.1 17.9 L10.3 15.1 L14.2 14.6 Z"/><path d="M27 22 L28.2 24.4 L30.8 24.7 L28.9 26.5 L29.4 29 L27 27.7 L24.6 29 L25.1 26.5 L23.2 24.7 L25.8 24.4 Z"/></g></svg>`;
   }
   if (f === 'hearts') {
-    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g fill="${col}"><path d="M15 24 C 10.5 19.5, 9.5 15, 12.5 13 C 14.3 11.7, 15.5 13, 15 14.5 C 15.5 13, 16.7 11.7, 18.5 13 C 21.5 15, 20.5 19.5, 15 24 Z"/><path d="M26 30 C 23 27.5, 22.5 25, 24 23.8 C 25 23, 26 23.8, 25.7 24.8 C 26 23.8, 27 23, 28 23.8 C 29.5 25, 29 27.5, 26 30 Z"/></g></svg>`;
+    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g fill="${col}" transform="translate(20,20) scale(${s}) translate(-20,-20)"><path d="M15 24 C 10.5 19.5, 9.5 15, 12.5 13 C 14.3 11.7, 15.5 13, 15 14.5 C 15.5 13, 16.7 11.7, 18.5 13 C 21.5 15, 20.5 19.5, 15 24 Z"/><path d="M26 30 C 23 27.5, 22.5 25, 24 23.8 C 25 23, 26 23.8, 25.7 24.8 C 26 23.8, 27 23, 28 23.8 C 29.5 25, 29 27.5, 26 30 Z"/></g></svg>`;
   }
   return '';
 }
@@ -1635,65 +1644,84 @@ function heartSubpath(g, cx, cy, s) {
   g.bezierCurveTo(cx + s * 0.65, cy - s * 0.85, cx + s * 1.15, cy + s * 0.1, cx, cy + s * 0.85);
   g.closePath();
 }
-function fillPattern(c, style, color) {
+function fillPattern(c, style, color, scale = 1) {
   const col = color || '#3b82f6';
-  const key = style + '|' + col;
+  const s = Math.max(0.35, Math.min(3.5, typeof scale === 'number' ? scale : 1));
+  const key = style + '|' + col + '|' + s.toFixed(2);
   if (patternCache[key]) return patternCache[key];
   const t = document.createElement('canvas');
+  let w = 12, h = 12;
   if (style === 'hatch') {
-    t.width = t.height = 12;
+    w = h = Math.max(6, Math.round(12 * s));
   } else if (style === 'grid') {
-    t.width = t.height = 14;
+    w = h = Math.max(6, Math.round(14 * s));
   } else if (style === 'zigzag') {
-    t.width = 20; t.height = 14;
+    w = Math.max(8, Math.round(20 * s));
+    h = Math.max(6, Math.round(14 * s));
   } else if (style === 'waves') {
-    t.width = 24; t.height = 16;
+    w = Math.max(10, Math.round(24 * s));
+    h = Math.max(6, Math.round(16 * s));
   } else if (style === 'checker') {
-    t.width = t.height = 16;
+    const half = Math.max(3, Math.round(8 * s));
+    w = h = half * 2;
   } else if (style === 'stars') {
-    t.width = t.height = 26;
+    w = h = Math.max(12, Math.round(26 * s));
   } else if (style === 'hearts') {
-    t.width = t.height = 26;
+    w = h = Math.max(12, Math.round(26 * s));
   } else { // dots
-    t.width = t.height = 12;
+    w = h = Math.max(6, Math.round(12 * s));
   }
+  t.width = w; t.height = h;
   const g = t.getContext('2d');
   g.strokeStyle = col; g.fillStyle = col;
-  g.lineWidth = 2.5; g.lineCap = 'round'; g.lineJoin = 'round';
+  g.lineWidth = Math.max(1, 2.5 * s);
+  g.lineCap = 'round'; g.lineJoin = 'round';
   const seg = (x0, y0, x1, y1) => { g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); };
   if (style === 'hatch') {
     g.lineCap = 'square';
     g.beginPath();
-    g.moveTo(0, 12); g.lineTo(12, 0);
-    g.moveTo(-3, 3); g.lineTo(3, -3);
-    g.moveTo(9, 15); g.lineTo(15, 9);
+    g.moveTo(0, h); g.lineTo(w, 0);
+    g.moveTo(-w * 0.25, h * 0.25); g.lineTo(w * 0.25, -h * 0.25);
+    g.moveTo(w * 0.75, h * 1.25); g.lineTo(w * 1.25, h * 0.75);
     g.stroke();
   } else if (style === 'grid') {
-    seg(7, 0, 7, 14); seg(0, 7, 14, 7);
+    seg(w / 2, 0, w / 2, h); seg(0, h / 2, w, h / 2);
   } else if (style === 'zigzag') {
     g.beginPath();
-    g.moveTo(0, 10);
-    for (let x = 5; x <= 20; x += 5) g.lineTo(x, x % 10 === 0 ? 10 : 4);
+    g.moveTo(0, h * 0.714);
+    const step = w / 4;
+    for (let i = 1; i <= 4; i++) g.lineTo(i * step, i % 2 === 0 ? h * 0.714 : h * 0.286);
     g.stroke();
   } else if (style === 'waves') {
     g.beginPath();
-    for (let x = 0; x <= 24; x += 2) {
-      const y = 8 + 4 * Math.sin((x / 24) * Math.PI * 2);
-      x === 0 ? g.moveTo(x, y) : g.lineTo(x, y);
+    const steps = Math.max(12, Math.round(12 * s));
+    const amp = h * 0.25;
+    for (let i = 0; i <= steps; i++) {
+      const x = (i / steps) * w;
+      const y = h / 2 + amp * Math.sin((x / w) * Math.PI * 2);
+      i === 0 ? g.moveTo(x, y) : g.lineTo(x, y);
     }
     g.stroke();
   } else if (style === 'checker') {
-    g.fillRect(0, 0, 8, 8); g.fillRect(8, 8, 8, 8);
+    const half = w / 2;
+    g.fillRect(0, 0, half, half); g.fillRect(half, half, half, half);
   } else if (style === 'stars') {
     g.beginPath();
-    starSubpath(g, 7, 7, 4.5); starSubpath(g, 19, 19, 4.5);
+    const r = Math.max(2, 4.5 * s);
+    starSubpath(g, w * 0.27, h * 0.27, r);
+    starSubpath(g, w * 0.73, h * 0.73, r);
     g.fill();
   } else if (style === 'hearts') {
     g.beginPath();
-    heartSubpath(g, 7, 8, 4.5); heartSubpath(g, 19, 20, 4.5);
+    const r = Math.max(2, 4.5 * s);
+    heartSubpath(g, w * 0.27, h * 0.31, r);
+    heartSubpath(g, w * 0.73, h * 0.77, r);
     g.fill();
   } else { // dots
-    g.beginPath(); g.arc(6, 6, 2.6, 0, Math.PI * 2); g.fill();
+    g.beginPath();
+    const r = Math.max(1, 2.6 * s);
+    g.arc(w / 2, h / 2, r, 0, Math.PI * 2);
+    g.fill();
   }
   const pat = c.createPattern(t, 'repeat');
   patternCache[key] = pat;
@@ -1718,7 +1746,8 @@ function drawShape(c, it) {
     const fa = it.fillOpacity !== undefined ? it.fillOpacity : 1;
     if (fa < 1) c.globalAlpha *= fa;
     const col = it.fillColor || fillColor || '#ffd93d';
-    if (it.fillStyle && it.fillStyle !== 'solid') c.fillStyle = fillPattern(c, it.fillStyle, col);
+    const pScale = it.patternDensity !== undefined ? it.patternDensity : bucketDensity;
+    if (it.fillStyle && it.fillStyle !== 'solid') c.fillStyle = fillPattern(c, it.fillStyle, col, pScale);
     else c.fillStyle = col;
     c.fill();
     c.restore();
@@ -2182,7 +2211,7 @@ function bucketFill(p) {
   lg.putImageData(limg, 0, 0);
   if (bucketPattern && bucketPattern !== 'solid') {
     lg.globalCompositeOperation = 'source-in';
-    lg.fillStyle = fillPattern(lg, bucketPattern, color);
+    lg.fillStyle = fillPattern(lg, bucketPattern, color, bucketDensity);
     lg.fillRect(0, 0, Wd, Hd);
     lg.globalCompositeOperation = 'source-over';
   }
@@ -2192,6 +2221,7 @@ function bucketFill(p) {
     type: 'image',
     isBucket: true,
     pattern: bucketPattern || 'solid',
+    density: bucketDensity,
     src,
     x: -view.x / zoom, y: -view.y / zoom,
     w: Wd / (dpr * zoom), h: Hd / (dpr * zoom),
@@ -3345,7 +3375,7 @@ function buildBucketPop() {
   const PATTERNS = ['solid', 'dots', 'hatch', 'grid', 'zigzag', 'waves', 'checker', 'stars', 'hearts'];
   for (const f of PATTERNS) {
     const b = document.createElement('button');
-    b.innerHTML = renderFillIcon(f, color);
+    b.innerHTML = renderFillIcon(f, color, bucketDensity);
     b.title = f === 'solid' ? 'Solid color fill' : f.charAt(0).toUpperCase() + f.slice(1) + ' pattern fill';
     if (f === bucketPattern) b.classList.add('picked');
     b.onclick = () => {
@@ -3357,6 +3387,27 @@ function buildBucketPop() {
     };
     bucketPop.appendChild(b);
   }
+  const curPct = Math.round(bucketDensity * 100);
+  const ow = document.createElement('div');
+  ow.className = 'opwrap';
+  ow.innerHTML = `<span>Density</span><input id="bucketDensity" type="range" min="40" max="260" step="5" value="${curPct}" aria-label="Pattern density" title="Pattern density: ${curPct}%" /><span id="bucketDensityVal" class="opval">${curPct}%</span>`;
+  const bds = ow.querySelector('#bucketDensity');
+  const bdv = ow.querySelector('#bucketDensityVal');
+  bds.oninput = (e) => {
+    e.stopPropagation();
+    const val = +bds.value;
+    bucketDensity = Math.max(0.4, Math.min(2.6, val / 100));
+    bdv.textContent = val + '%';
+    bds.title = 'Pattern density: ' + val + '%';
+    bucketPop.querySelectorAll('button').forEach((btn, idx) => {
+      const pat = PATTERNS[idx];
+      if (pat && pat !== 'solid') {
+        btn.innerHTML = renderFillIcon(pat, color, bucketDensity);
+      }
+    });
+    saveState();
+  };
+  bucketPop.appendChild(ow);
 }
 function updateBucketBtn() {
   if (!bucketBtn) return;
@@ -5015,7 +5066,7 @@ function setupDrawOverlay() {
     if (collab.tSel) { collab.tSel = null; paintOverlayMarks(); markCbTools(); }
     if (t === 'bucket') {
       const s = cur();
-      try { collab.mqtt.pub(roomTopic('d/' + s.sid), { k: 't-fill', x: p.x, y: p.y, color, alpha: opacity, pattern: bucketPattern }); } catch (err) {}
+      try { collab.mqtt.pub(roomTopic('d/' + s.sid), { k: 't-fill', x: p.x, y: p.y, color, alpha: opacity, pattern: bucketPattern, density: bucketDensity }); } catch (err) {}
       op = null; return;
     }
     if (t === 'text') {
@@ -5423,14 +5474,15 @@ function onStudentDirect(m) {
   } else if (m.k === 't-fill') {
     // creator's bucket tool: flood fill at their tapped point with their color
     if (typeof m.x === 'number' && typeof m.y === 'number') {
-      const oc = color, oo = opacity, op = bucketPattern;
+      const oc = color, oo = opacity, op = bucketPattern, od = bucketDensity;
       color = typeof m.color === 'string' ? m.color : oc;
       opacity = typeof m.alpha === 'number' ? m.alpha : oo;
       bucketPattern = typeof m.pattern === 'string' ? m.pattern : 'solid';
+      if (typeof m.density === 'number') bucketDensity = m.density;
       collab.applyingRemote = true;
       try { bucketFill({ x: +m.x, y: +m.y }); } catch (e) {}
       finally { collab.applyingRemote = false; }
-      color = oc; opacity = oo; bucketPattern = op;
+      color = oc; opacity = oo; bucketPattern = op; bucketDensity = od;
     }
   } else if (m.k === 't-del') {
     // the creator deleted one of their items from this canvas
