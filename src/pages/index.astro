@@ -708,9 +708,13 @@ const description = "Free online paint app and collaborative digital whiteboard.
       <button class="tool" data-tool="arrow" title="Arrow (A)">
         <svg viewBox="0 0 24 24"><path d="M4 12h14" stroke="#2b2b3a" stroke-width="2.6" stroke-linecap="round"/><path d="M13 6l6 6-6 6" fill="none" stroke="#2b2b3a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <button class="tool" data-tool="shape" id="shapeBtn" title="Shapes"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="13" fill="none" stroke="#2b2b3a" stroke-width="4"/></svg></button>
+      <button class="tool" data-tool="shape" id="shapeBtn" title="Shapes">
+        <svg viewBox="0 0 24 24"><path d="M8.3 10a.7.7 0 0 1-.626-1.079L11.4 3a.7.7 0 0 1 1.198-.043L16.3 8.9a.7.7 0 0 1-.572 1.1Z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="17.5" cy="17.5" r="3.5" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
       <button class="tool" data-tool="sticker" id="stickerBtn" title="Stickers"><svg viewBox="0 0 24 24"><path d="M12 2l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 16.3l-5.6 2.9 1.1-6.2-4.5-4.4 6.2-.9z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linejoin="round"/></svg></button>
-      <button class="tool" data-tool="text" id="textBtn" title="Text"><span style="font-family: inherit; font-weight: 700; font-size: 24px; line-height: 1; color: #2b2b3a;">T</span></button>
+      <button class="tool" data-tool="text" id="textBtn" title="Text">
+        <svg viewBox="0 0 24 24"><path d="M12 4v16" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 20h6" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
       <button class="tool" data-tool="image" id="imageBtn" title="Add a picture">
         <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5" fill="none" stroke="#2b2b3a" stroke-width="2"/><circle cx="9" cy="10" r="2" fill="none" stroke="#2b2b3a" stroke-width="1.8"/><path d="M4.5 16.5l4.3-3.4 3.4 2.6 2.8-2.1 4.5 3" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
@@ -2901,15 +2905,27 @@ const BRUSH_ICONS = {
   chalk: '<svg viewBox="0 0 40 40"><path d="M8 28 Q 20 8, 32 24" fill="none" stroke="#2b2b3a" stroke-width="10" stroke-linecap="round" opacity=".22"/><path d="M8 28 Q 20 8, 32 24" fill="none" stroke="#2b2b3a" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 4"/></svg>',
 };
 
-/* the Brush TOOL button always shows a real paintbrush; the popover shows the picked brush type */
+/* dedicated vector icons for category tools: brush, shapes, and typography / text */
 const BRUSH_TOOL_ICON = '<svg viewBox="0 0 24 24">'
   + '<path d="m11 10 3 3" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
   + '<path d="M6.5 21A3.5 3.5 0 1 0 3 17.5a2.62 2.62 0 0 1-.708 1.792A1 1 0 0 0 3 21z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
   + '<path d="M9.969 17.031 21.378 5.624a1 1 0 0 0-3.002-3.002L6.967 14.031" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
   + '</svg>';
 
+const SHAPES_TOOL_ICON = '<svg viewBox="0 0 24 24">'
+  + '<path d="M8.3 10a.7.7 0 0 1-.626-1.079L11.4 3a.7.7 0 0 1 1.198-.043L16.3 8.9a.7.7 0 0 1-.572 1.1Z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+  + '<rect x="3" y="14" width="7" height="7" rx="1" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+  + '<circle cx="17.5" cy="17.5" r="3.5" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+  + '</svg>';
+
+const TEXT_TOOL_ICON = '<svg viewBox="0 0 24 24">'
+  + '<path d="M12 4v16" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+  + '<path d="M4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+  + '<path d="M9 20h6" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+  + '</svg>';
+
 function refreshToolIcons() {
-  shapeBtn.innerHTML = SHAPE_ICONS[shapeKind] || SHAPE_ICONS.circle;
+  shapeBtn.innerHTML = SHAPES_TOOL_ICON;
   shapeBtn.title = 'Shapes: ' + shapeKind + ' (O)';
   const st = STICKERS.find(s => s.id === stickerId);
   const ol = OUTLINES.find(o => o.id === outlineId);
@@ -2929,15 +2945,7 @@ function refreshToolIcons() {
   brushBtn.innerHTML = BRUSH_TOOL_ICON;
   brushBtn.title = 'Brush: ' + (BRUSH_NAMES[brushType] || 'Round') + ' (B)';
   const tf = FONTS.find(f => f.stack === textFont) || FONTS[0];
-  textBtn.innerHTML = '';
-  const tspan = document.createElement('span');
-  tspan.textContent = 'T';
-  tspan.style.fontFamily = tf.stack;
-  tspan.style.fontWeight = '700';
-  tspan.style.fontSize = '24px';
-  tspan.style.lineHeight = '1';
-  tspan.style.color = '#2b2b3a';
-  textBtn.appendChild(tspan);
+  textBtn.innerHTML = TEXT_TOOL_ICON;
   textBtn.title = 'Text: ' + tf.name + ' (T)';
 }
 
