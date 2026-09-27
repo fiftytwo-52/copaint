@@ -679,13 +679,13 @@ const description = "Free online paint app and collaborative digital whiteboard.
         <svg class="foldchev" viewBox="0 0 24 24"><path d="M6 9.5l6 6.5 6-6.5z" fill="#57536e"/></svg>
       </button>
       <button class="tool" data-tool="select" title="Select and move (S)">
-        <svg viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 24 24"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="m13 13 6 6" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <button class="tool" data-tool="pan" title="Move the canvas (M)">
         <svg viewBox="0 0 24 24"><path d="M12 2v20M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M5 9l-3 3 3 3M9 5l3-3 3 3" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <button class="tool" data-tool="areaselect" title="Select an area">
-        <svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="1.5" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-dasharray="4 3"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M5 3a2 2 0 0 0-2 2M19 3a2 2 0 0 1 2 2M21 19a2 2 0 0 1-2 2M5 21a2 2 0 0 1-2-2M9 3h1M14 3h1M9 21h1M14 21h1M3 9v1M3 14v1M21 9v1M21 14v1" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <button class="tool active" data-tool="pencil" title="Pencil (P)">
         <svg viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="m15 5 4 4" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round"/></svg>
@@ -4247,7 +4247,7 @@ function buildTeacherUI() {
    sits behind the modal, so tools are switched here; it drives the same `tool`,
    `color`, `size` globals the main canvas uses */
 const CB_STRIP = [
-  ['select', 'Select / move / resize', '<svg viewBox="0 0 24 24"><path d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
+  ['select', 'Select / move / resize', '<svg viewBox="0 0 24 24"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="m13 13 6 6" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
   ['pencil', 'Pencil', '<svg viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="m15 5 4 4" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round"/></svg>'],
   ['brush', 'Brush', '<svg viewBox="0 0 24 24"><path d="m11 10 3 3" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 21A3.5 3.5 0 1 0 3 17.5a2.62 2.62 0 0 1-.708 1.792A1 1 0 0 0 3 21z" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.969 17.031 21.378 5.624a1 1 0 0 0-3.002-3.002L6.967 14.031" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
   ['highlighter', 'Highlighter', '<svg viewBox="0 0 24 24"><path d="m9 11-6 6v3h9l3-3" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
