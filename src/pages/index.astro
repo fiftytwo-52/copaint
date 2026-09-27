@@ -1938,18 +1938,51 @@ function drawA4() {
   }
   ctx.restore();
 }
-/* thin dotted circle showing the eraser's size around the pointer */
+/* thin dotted circle showing the tool's size around the pointer (pencil, brush/paint, highlighter, eraser) */
+function isDrawTool(t = tool) {
+  return t === 'pencil' || t === 'brush' || t === 'highlighter' || t === 'eraser';
+}
+function getToolPreviewRadius(t = tool) {
+  let s = size;
+  if (t === 'eraser') s = Math.max(size * 2.5, 14);
+  else if (t === 'highlighter') s = Math.max(size * 3, 18);
+  else if (t === 'brush') {
+    if (brushType === 'marker') s = size * 1.7;
+    else if (brushType === 'spray') s = size * 1.8;
+  }
+  return Math.max(2.5, (s / 2) * zoom);
+}
 function drawEraserPreview() {
-  if (!eraserHover) return;
-  const er = Math.max(size * 2.5, 14) / 2 * zoom;
+  if (!eraserHover || !isDrawTool()) return;
+  const rad = getToolPreviewRadius() * dpr;
+  const cx = eraserHover.x * dpr, cy = eraserHover.y * dpr;
   ctx.save();
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  // Outer light halo for guaranteed contrast on dark surfaces/paper
   ctx.beginPath();
-  ctx.arc(eraserHover.x * dpr, eraserHover.y * dpr, Math.max(er * dpr, 3), 0, Math.PI * 2);
+  ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+  ctx.setLineDash([5, 4]);
+  ctx.lineWidth = 2.4 * dpr;
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+  ctx.stroke();
+
+  // Dark dotted circle matching the eraser size ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, rad, 0, Math.PI * 2);
   ctx.setLineDash([5, 4]);
   ctx.lineWidth = 1.6 * dpr;
-  ctx.strokeStyle = 'rgba(43,43,58,0.75)';
+  ctx.strokeStyle = tool === 'eraser' ? 'rgba(43,43,58,0.85)' : 'rgba(30,30,45,0.9)';
   ctx.stroke();
+
+  // For drawing tools (pencil, brush, highlighter), show a tiny center dot if diameter is large enough
+  if (tool !== 'eraser' && rad >= 5 * dpr) {
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.arc(cx, cy, 1.2 * dpr, 0, Math.PI * 2);
+    ctx.fillStyle = color || '#1f2937';
+    ctx.fill();
+  }
   ctx.restore();
 }
 /* The eraser (destination-out) punches transparent holes through the whole stack,
@@ -2670,7 +2703,7 @@ canvas.addEventListener('pointerleave', () => {
 });
 canvas.addEventListener('pointermove', (e) => {
   const p = pos(e);
-  if (tool === 'eraser') { // track the pointer so the dotted size circle follows it
+  if (isDrawTool()) { // track pointer so size circle follows pencil, brush, highlighter, eraser
     const r = canvas.getBoundingClientRect();
     const nx = e.clientX - r.left, ny = e.clientY - r.top;
     if (!eraserHover || Math.abs(eraserHover.x - nx) > 0.5 || Math.abs(eraserHover.y - ny) > 0.5) {
@@ -2796,7 +2829,8 @@ canvas.addEventListener('pointermove', (e) => {
   }
 });
 
-function endPointer() {
+function endPointer(e) {
+  if (e && e.pointerType === 'touch') { eraserHover = null; redraw(); }
   if (drag && drag.mode === 'pan') { canvas.style.cursor = 'grab'; saveState(); }
   if (drag && drag.mode === 'move' && !drag.moved && (drag.pendingText || drag.editText)) {
     const t = drag.pendingText ? pendingText : drag.editText;
@@ -3320,7 +3354,7 @@ function togglePop(pop, btn) {
   }
 }
 
-const CURSORS = { select: 'default', pan: 'grab', eraser: 'cell', text: 'text', areaselect: 'crosshair' };
+const CURSORS = { select: 'default', pan: 'grab', eraser: 'none', pencil: 'none', brush: 'none', highlighter: 'none', text: 'text', areaselect: 'crosshair' };
 function setTool(t) {
   if (pendingShape) commitPending(false);
   if (pendingText) fixPendingText(false);
@@ -3330,7 +3364,8 @@ function setTool(t) {
   selected = null;
   areaSel = null;
   toolBtns.forEach((b) => b.classList.toggle('active', b.dataset.tool === t));
-  canvas.style.cursor = CURSORS[t] || 'crosshair';
+  canvas.style.cursor = isDrawTool(t) ? 'none' : (CURSORS[t] || 'crosshair');
+  if (!isDrawTool(t) && eraserHover) eraserHover = null;
   if (typeof markCbTools === 'function') markCbTools(); // keep the student-view strip in sync
   redraw();
 }
