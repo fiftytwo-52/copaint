@@ -126,14 +126,22 @@ const description = "Free online paint app and collaborative digital whiteboard.
     }
     #shapePop { grid-template-columns: repeat(3, 1fr); }
     #brushPop { grid-template-columns: repeat(3, 1fr); }
-    /* dropdown badges on brush / shapes / text buttons: dark dot with a white chevron */
+    /* dropdown indicator on tools with sub-menus (brush, shapes, text): minimal, sharp, deep dark chevron */
     button.tool[data-tool="brush"], #shapeBtn, #textBtn { position: relative; }
     button.tool[data-tool="brush"]::after, #shapeBtn::after, #textBtn::after {
-      content: ''; position: absolute; right: 1px; bottom: 1px; pointer-events: none;
-      width: 8px; height: 8px; border-radius: 50%;
-      background: #2b2b3a url('data:image/svg+xml;utf8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Cpath d=%22M6 9l6 6 6-6%22 fill=%22none%22 stroke=%22white%22 stroke-width=%225%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E') center / 5px 5px no-repeat;
-      border: 1px solid #fff;
-      box-shadow: 0 1px 2px rgba(0,0,0,.25);
+      content: '';
+      position: absolute;
+      right: 2px;
+      bottom: 2px;
+      width: 6px;
+      height: 6px;
+      pointer-events: none;
+      background: url('data:image/svg+xml;utf8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Cpath d=%22M2 3.5L5 6.5L8 3.5%22 fill=%22none%22 stroke=%22%23181824%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E') center / contain no-repeat;
+      opacity: 0.95;
+    }
+    button.tool[data-tool="brush"]:hover::after, #shapeBtn:hover::after, #textBtn:hover::after,
+    button.tool[data-tool="brush"].active::after, #shapeBtn.active::after, #textBtn.active::after {
+      opacity: 1;
     }
     #stickerPop { max-width: 252px; }
     #fontPop { grid-template-columns: 1fr; min-width: 168px; }
