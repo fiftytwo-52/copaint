@@ -124,11 +124,10 @@ const description = "Free online paint app and collaborative digital whiteboard.
       box-shadow: 0 8px 30px rgba(80, 60, 140, .25);
       display: grid; gap: 6px;
     }
-    #shapePop { grid-template-columns: repeat(3, 1fr); }
-    #brushPop { grid-template-columns: repeat(3, 1fr); }
-    /* dropdown indicator on tools with sub-menus (brush, shapes, text): minimal, sharp, deep dark chevron */
-    button.tool[data-tool="brush"], #shapeBtn, #textBtn { position: relative; }
-    button.tool[data-tool="brush"]::after, #shapeBtn::after, #textBtn::after {
+    #shapePop, #brushPop, #bucketPop, #fillStylePop { grid-template-columns: repeat(3, 1fr); }
+    /* dropdown indicator on tools with sub-menus (brush, shapes, text, bucket): minimal, sharp, deep dark chevron */
+    button.tool[data-tool="brush"], #shapeBtn, #textBtn, #bucketBtn { position: relative; }
+    button.tool[data-tool="brush"]::after, #shapeBtn::after, #textBtn::after, #bucketBtn::after {
       content: '';
       position: absolute;
       right: 2px;
@@ -139,8 +138,8 @@ const description = "Free online paint app and collaborative digital whiteboard.
       background: url('data:image/svg+xml;utf8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Cpath d=%22M2 3.5L5 6.5L8 3.5%22 fill=%22none%22 stroke=%22%23181824%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E') center / contain no-repeat;
       opacity: 0.95;
     }
-    button.tool[data-tool="brush"]:hover::after, #shapeBtn:hover::after, #textBtn:hover::after,
-    button.tool[data-tool="brush"].active::after, #shapeBtn.active::after, #textBtn.active::after {
+    button.tool[data-tool="brush"]:hover::after, #shapeBtn:hover::after, #textBtn:hover::after, #bucketBtn:hover::after,
+    button.tool[data-tool="brush"].active::after, #shapeBtn.active::after, #textBtn.active::after, #bucketBtn.active::after {
       opacity: 1;
     }
     #stickerPop { max-width: 252px; }
@@ -153,7 +152,7 @@ const description = "Free online paint app and collaborative digital whiteboard.
     #fontPop button.bgNone { width: 34px; height: 28px; border: 2px solid #e6e1f5; border-radius: 8px; cursor: pointer; padding: 0; justify-content: center;
       background: linear-gradient(135deg, #ffffff 44%, #e05252 44%, #e05252 56%, #ffffff 56%); }
     #fontPop button.bgNone.on { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(122,90,220,.25); }
-    #strokePop, #fillStylePop { grid-template-columns: 1fr; }
+    #strokePop { grid-template-columns: 1fr; }
     #exportPop { grid-template-columns: 1fr; min-width: 170px; }
     #bgPop { grid-template-columns: repeat(4, 1fr); }
     #bgPop .popSecLabel {
@@ -730,7 +729,7 @@ const description = "Free online paint app and collaborative digital whiteboard.
       <button class="tool" data-tool="eraser" title="Eraser (E)">
         <svg viewBox="0 0 24 24"><path d="M21 21H8a2 2 0 0 1-1.42-.587l-3.994-3.999a2 2 0 0 1 0-2.828l10-10a2 2 0 0 1 2.829 0l5.999 6a2 2 0 0 1 0 2.828L12.834 21" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="m5.082 11.09 8.828 8.828" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round"/></svg>
       </button>
-      <button class="tool" data-tool="bucket" title="Bucket fill (G)">
+      <button class="tool" data-tool="bucket" id="bucketBtn" title="Bucket fill (G)">
         <svg viewBox="0 0 24 24"><path d="M11 7 6 2" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.992 12H2.041" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21.145 18.38A3.34 3.34 0 0 1 20 16.5a3.3 3.3 0 0 1-1.145 1.88c-.575.46-.855 1.02-.855 1.595A2 2 0 0 0 20 22a2 2 0 0 0 2-2.025c0-.58-.285-1.13-.855-1.595" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="m8.5 4.5 2.148-2.148a1.205 1.205 0 0 1 1.704 0l7.296 7.296a1.205 1.205 0 0 1 0 1.704l-7.592 7.592a3.615 3.615 0 0 1-5.112 0l-3.888-3.888a3.615 3.615 0 0 1 0-5.112L5.67 7.33" fill="none" stroke="#2b2b3a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <button class="tool" data-tool="line" title="Line (L)">
@@ -803,6 +802,7 @@ const description = "Free online paint app and collaborative digital whiteboard.
   <div id="fontPop" class="popover" hidden></div>
   <div id="strokePop" class="popover" hidden></div>
   <div id="fillStylePop" class="popover" hidden></div>
+  <div id="bucketPop" class="popover" hidden></div>
   <div id="exportPop" class="popover" hidden></div>
   <div id="bgPop" class="popover" hidden></div>
   <div id="colorPop" class="popover" hidden></div>
@@ -932,7 +932,8 @@ let size = 8;                 // brush diameter in css px
 let dash = 'solid';           // solid | dashed | dotted  (stroke style)
 let fillShapes = true;
 let fillColor = '#ffd93d';
-let fillStyle = 'solid';      // solid | hatch | dots
+let fillStyle = 'solid';      // solid | dots | hatch | grid | zigzag | waves | checker | stars | hearts
+let bucketPattern = 'solid';  // solid | dots | hatch | grid | zigzag | waves | checker | stars | hearts
 let shapeKind = 'circle';     // circle | rect | triangle | star | heart
 let stickerId = 'star';
 let stickerMode = 'vector';   // vector | outline | emoji — what the sticker tool stamps
@@ -1008,7 +1009,7 @@ function loadState() {
 function saveState() {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify({
-      v: 3, bg, bgPattern, showA4, color, size, opacity, dash, fillColor, fillStyle, fillShapes,
+      v: 3, bg, bgPattern, showA4, color, size, opacity, dash, fillColor, fillStyle, fillShapes, bucketPattern,
       shapeKind, stickerId, stickerMode, outlineId, emojiChar, brushType, textFont, textBg, view, zoom,
       toolbarCollapsed: toolbar.classList.contains('collapsed'),
       toolbarPos,
@@ -1027,6 +1028,7 @@ if (saved) {
   if (saved.opacity !== undefined) opacity = Math.max(0.1, Math.min(1, saved.opacity));
   dash = saved.dash || dash;
   fillColor = saved.fillColor || fillColor; fillStyle = saved.fillStyle || fillStyle;
+  if (saved.bucketPattern) bucketPattern = saved.bucketPattern;
   fillShapes = saved.fillShapes !== false;
   shapeKind = saved.shapeKind || shapeKind; stickerId = saved.stickerId || stickerId;
   stickerMode = saved.stickerMode || stickerMode; outlineId = saved.outlineId || outlineId;
@@ -1250,17 +1252,39 @@ const DASH_ICONS = {
   dashed: '<svg viewBox="0 0 40 16"><path d="M4 8h32" stroke="#2b2b3a" stroke-width="4" stroke-linecap="round" stroke-dasharray="8 6"/></svg>',
   dotted: '<svg viewBox="0 0 40 16"><path d="M4 8h32" stroke="#2b2b3a" stroke-width="4" stroke-linecap="round" stroke-dasharray="0.1 8"/></svg>',
 };
-const FILLSTYLE_ICONS = {
-  solid: '<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#7CC6FF" stroke="#2b2b3a" stroke-width="3"/></svg>',
-  hatch: '<svg viewBox="0 0 40 40"><defs><clipPath id="kfh"><rect x="7" y="7" width="26" height="26" rx="5"/></clipPath></defs><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g clip-path="url(#kfh)" stroke="#2b6CB0" stroke-width="3"><path d="M4 32L32 4M-4 20L20 -4M16 44L44 16"/></g></svg>',
-  dots: '<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g fill="#2b6CB0"><circle cx="15" cy="15" r="2.6"/><circle cx="25" cy="15" r="2.6"/><circle cx="15" cy="25" r="2.6"/><circle cx="25" cy="25" r="2.6"/></g></svg>',
-  grid: '<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g stroke="#2b6CB0" stroke-width="2.5"><path d="M20 7v26M7 20h26"/></g></svg>',
-  zigzag: '<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><path d="M9 27 L15 16 L21 27 L27 16 L33 27" fill="none" stroke="#2b6CB0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  waves: '<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><path d="M9 20 q 3 -6 6 0 t 6 0 t 6 0" fill="none" stroke="#2b6CB0" stroke-width="2.5" stroke-linecap="round"/></svg>',
-  checker: '<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g fill="#2b6CB0"><rect x="14" y="14" width="6" height="6"/><rect x="20" y="20" width="6" height="6"/></g></svg>',
-  stars: '<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g fill="#2b6CB0"><path d="M16 11 L17.8 14.6 L21.7 15.1 L18.9 17.9 L19.5 21.8 L16 19.8 L12.5 21.8 L13.1 17.9 L10.3 15.1 L14.2 14.6 Z"/><path d="M27 22 L28.2 24.4 L30.8 24.7 L28.9 26.5 L29.4 29 L27 27.7 L24.6 29 L25.1 26.5 L23.2 24.7 L25.8 24.4 Z"/></g></svg>',
-  hearts: '<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g fill="#2b6CB0"><path d="M15 24 C 10.5 19.5, 9.5 15, 12.5 13 C 14.3 11.7, 15.5 13, 15 14.5 C 15.5 13, 16.7 11.7, 18.5 13 C 21.5 15, 20.5 19.5, 15 24 Z"/><path d="M26 30 C 23 27.5, 22.5 25, 24 23.8 C 25 23, 26 23.8, 25.7 24.8 C 26 23.8, 27 23, 28 23.8 C 29.5 25, 29 27.5, 26 30 Z"/></g></svg>',
-};
+function renderFillIcon(f, col = '#2b6CB0') {
+  if (f === 'solid') {
+    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="${col}" stroke="#2b2b3a" stroke-width="3"/></svg>`;
+  }
+  if (f === 'hatch') {
+    return `<svg viewBox="0 0 40 40"><defs><clipPath id="kfh"><rect x="7" y="7" width="26" height="26" rx="5"/></clipPath></defs><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g clip-path="url(#kfh)" stroke="${col}" stroke-width="3"><path d="M4 32L32 4M-4 20L20 -4M16 44L44 16"/></g></svg>`;
+  }
+  if (f === 'dots') {
+    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g fill="${col}"><circle cx="15" cy="15" r="2.6"/><circle cx="25" cy="15" r="2.6"/><circle cx="15" cy="25" r="2.6"/><circle cx="25" cy="25" r="2.6"/></g></svg>`;
+  }
+  if (f === 'grid') {
+    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g stroke="${col}" stroke-width="2.5"><path d="M20 7v26M7 20h26"/></g></svg>`;
+  }
+  if (f === 'zigzag') {
+    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><path d="M9 27 L15 16 L21 27 L27 16 L33 27" fill="none" stroke="${col}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  }
+  if (f === 'waves') {
+    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><path d="M9 20 q 3 -6 6 0 t 6 0 t 6 0" fill="none" stroke="${col}" stroke-width="2.5" stroke-linecap="round"/></svg>`;
+  }
+  if (f === 'checker') {
+    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g fill="${col}"><rect x="14" y="14" width="6" height="6"/><rect x="20" y="20" width="6" height="6"/></g></svg>`;
+  }
+  if (f === 'stars') {
+    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g fill="${col}"><path d="M16 11 L17.8 14.6 L21.7 15.1 L18.9 17.9 L19.5 21.8 L16 19.8 L12.5 21.8 L13.1 17.9 L10.3 15.1 L14.2 14.6 Z"/><path d="M27 22 L28.2 24.4 L30.8 24.7 L28.9 26.5 L29.4 29 L27 27.7 L24.6 29 L25.1 26.5 L23.2 24.7 L25.8 24.4 Z"/></g></svg>`;
+  }
+  if (f === 'hearts') {
+    return `<svg viewBox="0 0 40 40"><rect x="7" y="7" width="26" height="26" rx="5" fill="#ffffff" stroke="#2b2b3a" stroke-width="3"/><g fill="${col}"><path d="M15 24 C 10.5 19.5, 9.5 15, 12.5 13 C 14.3 11.7, 15.5 13, 15 14.5 C 15.5 13, 16.7 11.7, 18.5 13 C 21.5 15, 20.5 19.5, 15 24 Z"/><path d="M26 30 C 23 27.5, 22.5 25, 24 23.8 C 25 23, 26 23.8, 25.7 24.8 C 26 23.8, 27 23, 28 23.8 C 29.5 25, 29 27.5, 26 30 Z"/></g></svg>`;
+  }
+  return '';
+}
+const FILLSTYLE_ICONS = new Proxy({}, {
+  get: (_, prop) => renderFillIcon(prop, '#2b6CB0')
+});
 
 /* ---------------- canvas sizing ---------------- */
 function resize() {
@@ -1607,32 +1631,46 @@ function heartSubpath(g, cx, cy, s) {
   g.closePath();
 }
 function fillPattern(c, style, color) {
-  const key = style + '|' + color;
+  const col = color || '#3b82f6';
+  const key = style + '|' + col;
   if (patternCache[key]) return patternCache[key];
   const t = document.createElement('canvas');
+  if (style === 'hatch') {
+    t.width = t.height = 12;
+  } else if (style === 'grid') {
+    t.width = t.height = 14;
+  } else if (style === 'zigzag') {
+    t.width = 20; t.height = 14;
+  } else if (style === 'waves') {
+    t.width = 24; t.height = 16;
+  } else if (style === 'checker') {
+    t.width = t.height = 16;
+  } else if (style === 'stars') {
+    t.width = t.height = 26;
+  } else if (style === 'hearts') {
+    t.width = t.height = 26;
+  } else { // dots
+    t.width = t.height = 12;
+  }
   const g = t.getContext('2d');
-  g.strokeStyle = color; g.fillStyle = color;
+  g.strokeStyle = col; g.fillStyle = col;
   g.lineWidth = 2.5; g.lineCap = 'round'; g.lineJoin = 'round';
   const seg = (x0, y0, x1, y1) => { g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); };
   if (style === 'hatch') {
-    t.width = t.height = 10;
     g.lineCap = 'square';
     g.beginPath();
-    g.moveTo(0, 10); g.lineTo(10, 0);
-    g.moveTo(-2.5, 2.5); g.lineTo(2.5, -2.5);
-    g.moveTo(7.5, 12.5); g.lineTo(12.5, 7.5);
+    g.moveTo(0, 12); g.lineTo(12, 0);
+    g.moveTo(-3, 3); g.lineTo(3, -3);
+    g.moveTo(9, 15); g.lineTo(15, 9);
     g.stroke();
   } else if (style === 'grid') {
-    t.width = t.height = 14;
     seg(7, 0, 7, 14); seg(0, 7, 14, 7);
   } else if (style === 'zigzag') {
-    t.width = 20; t.height = 14;
     g.beginPath();
     g.moveTo(0, 10);
     for (let x = 5; x <= 20; x += 5) g.lineTo(x, x % 10 === 0 ? 10 : 4);
     g.stroke();
   } else if (style === 'waves') {
-    t.width = 24; t.height = 16;
     g.beginPath();
     for (let x = 0; x <= 24; x += 2) {
       const y = 8 + 4 * Math.sin((x / 24) * Math.PI * 2);
@@ -1640,20 +1678,16 @@ function fillPattern(c, style, color) {
     }
     g.stroke();
   } else if (style === 'checker') {
-    t.width = t.height = 16;
     g.fillRect(0, 0, 8, 8); g.fillRect(8, 8, 8, 8);
   } else if (style === 'stars') {
-    t.width = t.height = 26;
     g.beginPath();
     starSubpath(g, 7, 7, 4.5); starSubpath(g, 19, 19, 4.5);
     g.fill();
   } else if (style === 'hearts') {
-    t.width = t.height = 26;
     g.beginPath();
     heartSubpath(g, 7, 8, 4.5); heartSubpath(g, 19, 20, 4.5);
     g.fill();
   } else { // dots
-    t.width = t.height = 12;
     g.beginPath(); g.arc(6, 6, 2.6, 0, Math.PI * 2); g.fill();
   }
   const pat = c.createPattern(t, 'repeat');
@@ -1673,8 +1707,9 @@ function drawShape(c, it) {
     return;
   }
   if (it.fill) {
-    if (it.fillStyle && it.fillStyle !== 'solid') c.fillStyle = fillPattern(c, it.fillStyle, it.fillColor);
-    else c.fillStyle = it.fillColor;
+    const col = it.fillColor || fillColor || '#ffd93d';
+    if (it.fillStyle && it.fillStyle !== 'solid') c.fillStyle = fillPattern(c, it.fillStyle, col);
+    else c.fillStyle = col;
     c.fill();
   }
   if (it.border !== false) { // the border stays visible even when the shape is filled
@@ -2057,7 +2092,9 @@ function bucketFill(p) {
   const tr = data[si], tg = data[si + 1], tb = data[si + 2], ta = data[si + 3];
   const fc = parseColor(color);
   const fa = Math.round(opacity * 255);
-  if (Math.abs(tr - fc.r) < 6 && Math.abs(tg - fc.g) < 6 && Math.abs(tb - fc.b) < 6 && Math.abs(ta - fa) < 6) return; // already that color
+  if (!bucketPattern || bucketPattern === 'solid') {
+    if (Math.abs(tr - fc.r) < 6 && Math.abs(tg - fc.g) < 6 && Math.abs(tb - fc.b) < 6 && Math.abs(ta - fa) < 6) return; // already that color
+  }
   const tol = 42;
   const seen = new Uint8Array(Wd * Hd);
   const layer = document.createElement('canvas');
@@ -2095,11 +2132,18 @@ function bucketFill(p) {
     }
   }
   lg.putImageData(limg, 0, 0);
+  if (bucketPattern && bucketPattern !== 'solid') {
+    lg.globalCompositeOperation = 'source-in';
+    lg.fillStyle = fillPattern(lg, bucketPattern, color);
+    lg.fillRect(0, 0, Wd, Hd);
+    lg.globalCompositeOperation = 'source-over';
+  }
   const src = layer.toDataURL('image/png');
   imageCache[src] = layer;
   commit({
     type: 'image',
     isBucket: true,
+    pattern: bucketPattern || 'solid',
     src,
     x: -view.x / zoom, y: -view.y / zoom,
     w: Wd / (dpr * zoom), h: Hd / (dpr * zoom),
@@ -2949,12 +2993,14 @@ const stickerBtn = document.getElementById('stickerBtn');
 const textBtn = document.getElementById('textBtn');
 const imageBtn = document.getElementById('imageBtn');
 const brushBtn = document.querySelector('button.tool[data-tool="brush"]');
+const bucketBtn = document.getElementById('bucketBtn');
 const shapePop = document.getElementById('shapePop');
 const stickerPop = document.getElementById('stickerPop');
 const brushPop = document.getElementById('brushPop');
 const fontPop = document.getElementById('fontPop');
 const strokePop = document.getElementById('strokePop');
 const fillStylePop = document.getElementById('fillStylePop');
+const bucketPop = document.getElementById('bucketPop');
 const exportPop = document.getElementById('exportPop');
 const bgPop = document.getElementById('bgPop');
 const colorPop = document.getElementById('colorPop');
@@ -2968,7 +3014,7 @@ const strokeStyleBtn = document.getElementById('strokeStyleBtn');
 const shapeFillPattern = document.getElementById('shapeFillPattern');
 const paperBtn = document.getElementById('paperBtn');
 const exportBtn = document.getElementById('exportBtn');
-const allPops = [shapePop, stickerPop, brushPop, fontPop, strokePop, fillStylePop, exportPop, bgPop, colorPop, clearPop, collabPop];
+const allPops = [shapePop, stickerPop, brushPop, fontPop, strokePop, fillStylePop, bucketPop, exportPop, bgPop, colorPop, clearPop, collabPop];
 
 const BRUSH_ORDER = ['round', 'marker', 'calligraphy', 'spray', 'crayon', 'neon', 'dots', 'rainbow', 'taper', 'sketch', 'chalk'];
 const BRUSH_NAMES = { round: 'Round', marker: 'Marker', calligraphy: 'Calligraphy', spray: 'Spray', crayon: 'Crayon', neon: 'Neon', dots: 'Dots', rainbow: 'Rainbow', taper: 'Taper', sketch: 'Sketch', chalk: 'Chalk' };
@@ -3150,12 +3196,25 @@ function buildPops() {
     strokePop.appendChild(b);
   }
   fillStylePop.innerHTML = '';
-  for (const f of ['solid', 'hatch', 'dots', 'grid', 'zigzag', 'waves', 'checker', 'stars', 'hearts']) {
+  const curFill = (pendingShape && pendingShape.fillColor) || (selected && selected.fillColor) || fillColor || '#facc15';
+  for (const f of ['solid', 'dots', 'hatch', 'grid', 'zigzag', 'waves', 'checker', 'stars', 'hearts']) {
     const b = document.createElement('button');
-    b.innerHTML = FILLSTYLE_ICONS[f];
+    b.innerHTML = renderFillIcon(f, curFill);
     b.title = f;
     if (f === fillStyle) b.classList.add('picked');
-    b.onclick = () => { fillStyle = f; const ft = fillTarget(); if (ft) ft.fillStyle = f; refreshStyleIcons(); hidePops(); redraw(); saveState(); };
+    b.onclick = () => {
+      fillStyle = f;
+      const ft = fillTarget();
+      if (ft) { ft.fillStyle = f; ft.fill = true; fillShapes = true; }
+      refreshStyleIcons();
+      if (shapeFillPattern) {
+        shapeFillPattern.innerHTML = renderFillIcon(f, (ft && ft.fillColor) || curFill);
+        shapeFillPattern.title = 'Fill style: ' + f;
+      }
+      hidePops();
+      redraw();
+      saveState();
+    };
     fillStylePop.appendChild(b);
   }
   exportPop.innerHTML = '';
@@ -3209,7 +3268,34 @@ function buildPops() {
   }
 
   buildColorPop();
+  buildBucketPop();
+  updateBucketBtn();
 }
+
+function buildBucketPop() {
+  if (!bucketPop) return;
+  bucketPop.innerHTML = '';
+  const PATTERNS = ['solid', 'dots', 'hatch', 'grid', 'zigzag', 'waves', 'checker', 'stars', 'hearts'];
+  for (const f of PATTERNS) {
+    const b = document.createElement('button');
+    b.innerHTML = renderFillIcon(f, color);
+    b.title = f === 'solid' ? 'Solid color fill' : f.charAt(0).toUpperCase() + f.slice(1) + ' pattern fill';
+    if (f === bucketPattern) b.classList.add('picked');
+    b.onclick = () => {
+      bucketPattern = f;
+      setTool('bucket');
+      updateBucketBtn();
+      hidePops();
+      saveState();
+    };
+    bucketPop.appendChild(b);
+  }
+}
+function updateBucketBtn() {
+  if (!bucketBtn) return;
+  bucketBtn.title = 'Bucket fill: ' + (bucketPattern === 'solid' ? 'Solid' : bucketPattern) + ' (G)';
+}
+
 function hidePops() { allPops.forEach(p => { if (p) p.hidden = true; }); }
 function togglePop(pop, btn) {
   const wasHidden = pop.hidden;
@@ -3251,9 +3337,9 @@ function setTool(t) {
 toolBtns.forEach((b) => {
   b.addEventListener('click', () => {
     const t = b.dataset.tool;
-    if (t === 'shape' || t === 'sticker' || t === 'brush' || t === 'text') {
+    if (t === 'shape' || t === 'sticker' || t === 'brush' || t === 'text' || t === 'bucket') {
       setTool(t);
-      togglePop(t === 'shape' ? shapePop : t === 'sticker' ? stickerPop : t === 'brush' ? brushPop : fontPop, b);
+      togglePop(t === 'shape' ? shapePop : t === 'sticker' ? stickerPop : t === 'brush' ? brushPop : t === 'text' ? fontPop : bucketPop, b);
     } else if (t === 'image') {
       hidePops();
       imagePicker.click();
@@ -3266,7 +3352,7 @@ toolBtns.forEach((b) => {
 document.addEventListener('pointerdown', (e) => {
   const pairs = [
     [shapePop, shapeBtn], [stickerPop, stickerBtn], [brushPop, brushBtn],
-    [fontPop, textBtn], [strokePop, strokeStyleBtn], [fillStylePop, shapeFillPattern],
+    [fontPop, textBtn], [bucketPop, bucketBtn], [strokePop, strokeStyleBtn], [fillStylePop, shapeFillPattern],
     [exportPop, exportBtn], [bgPop, paperBtn], [colorPop, colorDot],
     [clearPop, clearBtn]
   ];
@@ -3287,6 +3373,7 @@ function buildColors() {
   // the single dot always shows the current drawing color
   colorDot.style.background = color;
   colorDot.title = 'Color ' + color + ' · Opacity ' + Math.round(opacity * 100) + '% — tap to change';
+  if (typeof buildBucketPop === 'function') buildBucketPop();
 }
 function buildColorPop() {
   colorPop.innerHTML = '';
@@ -3399,6 +3486,9 @@ shapeFillCustom.addEventListener('input', () => {
   fillColor = shapeFillCustom.value; fillShapes = true;
   t.fillColor = fillColor; t.fill = true;
   renderFillColor(); renderFill(); redraw(); saveState();
+  if (shapeFillPattern) {
+    shapeFillPattern.innerHTML = renderFillIcon(t.fillStyle || 'solid', fillColor);
+  }
 });
 function renderFillColor() {
   let matched = false;
@@ -3480,12 +3570,16 @@ function updateShapeFillBar() {
         fillColor = c; fillShapes = true;
         tt.fillColor = c; tt.fill = true;
         renderFillColor(); renderFill(); redraw(); saveState();
+        if (shapeFillPattern) {
+          shapeFillPattern.innerHTML = renderFillIcon(tt.fillStyle || 'solid', c);
+        }
       });
       shapeFillColors.appendChild(b);
     }
   }
   renderFillColor();
-  shapeFillPattern.innerHTML = FILLSTYLE_ICONS[t.fillStyle] || FILLSTYLE_ICONS.solid;
+  const curFillCol = t.fillColor || fillColor || '#facc15';
+  shapeFillPattern.innerHTML = renderFillIcon(t.fillStyle || 'solid', curFillCol);
   shapeFillPattern.title = 'Fill style: ' + (t.fillStyle || 'solid');
   if (!shapeOutlineColors.children.length) {
     for (const c of SHAPE_OUTLINE_PRESETS) {
@@ -4698,7 +4792,7 @@ function setupDrawOverlay() {
     if (collab.tSel) { collab.tSel = null; paintOverlayMarks(); markCbTools(); }
     if (t === 'bucket') {
       const s = cur();
-      try { collab.mqtt.pub(roomTopic('d/' + s.sid), { k: 't-fill', x: p.x, y: p.y, color, alpha: opacity }); } catch (err) {}
+      try { collab.mqtt.pub(roomTopic('d/' + s.sid), { k: 't-fill', x: p.x, y: p.y, color, alpha: opacity, pattern: bucketPattern }); } catch (err) {}
       op = null; return;
     }
     if (t === 'text') {
@@ -5106,13 +5200,14 @@ function onStudentDirect(m) {
   } else if (m.k === 't-fill') {
     // creator's bucket tool: flood fill at their tapped point with their color
     if (typeof m.x === 'number' && typeof m.y === 'number') {
-      const oc = color, oo = opacity;
+      const oc = color, oo = opacity, op = bucketPattern;
       color = typeof m.color === 'string' ? m.color : oc;
       opacity = typeof m.alpha === 'number' ? m.alpha : oo;
+      bucketPattern = typeof m.pattern === 'string' ? m.pattern : 'solid';
       collab.applyingRemote = true;
       try { bucketFill({ x: +m.x, y: +m.y }); } catch (e) {}
       finally { collab.applyingRemote = false; }
-      color = oc; opacity = oo;
+      color = oc; opacity = oo; bucketPattern = op;
     }
   } else if (m.k === 't-del') {
     // the creator deleted one of their items from this canvas
